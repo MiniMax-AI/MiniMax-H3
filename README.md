@@ -17,17 +17,15 @@
 
 # MiniMax H3
 
-This repository includes 1 prompt writing skill and 8 style-specific video generation skills.
-
 ## Prompt Writing Skill
 
-Install the bundled prompt writing skill:
+Install the H3 prompt writing skill — one of nine skills bundled with this repository:
 
 ```bash
 npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing
 ```
 
-The skill contains the base text/keyframe guide and the full-reference guide under `skills/h3-prompt-writing/references/`.
+It ships with two prompt guides under `skills/h3-prompt-writing/references/`: `base-en.txt` for text/keyframe modes and `ref-en.txt` for full-reference (Ref2VA) mode. The remaining eight are style-specific video generation skills:
 
 <table align="center">
   <tr>
