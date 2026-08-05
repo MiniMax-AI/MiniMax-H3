@@ -17,21 +17,13 @@
 
 ## Prompt Writing Skill
 
-The prompt writing skill is bundled with this repository. It contains the base text/keyframe guide and the full-reference guide under `skills/h3-prompt-writing/references/`.
-
-Install it into `~/.codex/skills` with npx:
+Install the bundled prompt writing skill:
 
 ```bash
-npx --yes github:MiniMax-AI/MiniMax-H3#main minimax-h3-prompt-skill
+npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing
 ```
 
-The explicit form is equivalent:
-
-```bash
-npx --yes github:MiniMax-AI/MiniMax-H3#main minimax-h3-prompt-skill install
-```
-
-Use `--dir PATH` to install into a custom skills directory and `--force` to replace an existing installation.
+The skill contains the base text/keyframe guide and the full-reference guide under `skills/h3-prompt-writing/references/`.
 
 ## Online API
 Use MiniMax\-H3 directly via API\. 
