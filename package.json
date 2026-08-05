@@ -1,0 +1,19 @@
+{
+  "name": "minimax-h3-prompt-skill",
+  "version": "1.0.0",
+  "description": "Install the MiniMax H3 video prompt writing skill.",
+  "bin": {
+    "minimax-h3-prompt-skill": "bin/minimax-h3-prompt-skill.js"
+  },
+  "files": [
+    "bin",
+    "skills/h3-prompt-writing"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "help": "node bin/minimax-h3-prompt-skill.js --help"
+  },
+  "license": "SEE LICENSE IN https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE"
+}
