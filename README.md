@@ -17,6 +17,8 @@
 
 # MiniMax H3
 
+This repository includes 1 prompt writing skill and 8 style-specific video generation skills.
+
 ## Prompt Writing Skill
 
 Install the bundled prompt writing skill:
