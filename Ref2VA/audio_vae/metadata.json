@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "kwargs": {
+      "attn_proj": true,
+      "decoder_dim": 1024,
+      "decoder_rates": [
+        5,
+        5,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "decoder_type": "bigvgan",
+      "encoder_dim": 64,
+      "encoder_rates": [
+        2,
+        4,
+        4,
+        5,
+        5
+      ],
+      "latent_dim": 2048,
+      "sample_rate": 32000,
+      "vae_latent_channels": 32
+    }
+  }
+}

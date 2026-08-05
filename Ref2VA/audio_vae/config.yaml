@@ -1,0 +1,5 @@
+model_config:
+  sr: 32000
+  decoder_dim: 1024
+  audio_channel: 1
+  vae_latent_channels: 32

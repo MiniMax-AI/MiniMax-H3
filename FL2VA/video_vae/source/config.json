@@ -1,0 +1,71 @@
+{
+  "_class_name": "AutoencoderKLLegacy",
+  "_diffusers_version": "0.32.2",
+  "causal_decoder": false,
+  "causal_encoder": true,
+  "ch": 128,
+  "ch_mult": [
+    1,
+    2,
+    2,
+    4,
+    4,
+    8
+  ],
+  "embed_dim": 24,
+  "in_channels": 3,
+  "num_res_blocks": 2,
+  "num_res_blocks_decoder": null,
+  "out_ch": 3,
+  "padding_mode": "reflect",
+  "padding_mode_t": null,
+  "pixel_norm_type": "imagenet",
+  "scaling_factor": 1.0,
+  "shift_factor": 0.0,
+  "space_down": [
+    2,
+    2,
+    2,
+    2,
+    1,
+    1
+  ],
+  "space_up": [
+    1,
+    2,
+    2,
+    2,
+    2,
+    1
+  ],
+  "time_down": [
+    1,
+    2,
+    2,
+    1,
+    1,
+    1
+  ],
+  "time_up": null,
+  "use_3d_conv": true,
+  "use_t_isolated_gn": true,
+  "use_vit_decoder": true,
+  "vae_ratio": 16,
+  "vae_ratio_t": 4,
+  "vit_decoder_kwargs": {
+    "dim_head": 64,
+    "ffn_activation_fn": "silu",
+    "ffn_use_gated": true,
+    "heads": 32,
+    "norm_affine": true,
+    "norm_type": "rms_norm",
+    "num_layers": 36,
+    "qk_norm_affine": false,
+    "qk_norm_type": "rms_norm",
+    "rope_dim_ratio": 0.75,
+    "rope_theta": 100.0
+  },
+  "z_channels": 24,
+  "zq_ch_decoder": null,
+  "zq_ch_encoder": null
+}

@@ -1,0 +1,131 @@
+{
+  "_class_name": "MiniMaxH3ModularPipeline",
+  "_diffusers_version": "0.36.0.dev0",
+  "_blocks_class_name": "MiniMaxH3Blocks",
+  "text_encoder": [
+    "transformers",
+    "Qwen3VLForConditionalGeneration",
+    {
+      "type_hint": [
+        "transformers",
+        "Qwen3VLForConditionalGeneration"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "text_encoder",
+      "variant": null,
+      "revision": null
+    }
+  ],
+  "tokenizer": [
+    "transformers",
+    "Qwen2TokenizerFast",
+    {
+      "type_hint": [
+        "transformers",
+        "Qwen2TokenizerFast"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "tokenizer",
+      "variant": null,
+      "revision": null
+    }
+  ],
+  "processor": [
+    "transformers",
+    "Qwen3VLProcessor",
+    {
+      "type_hint": [
+        "transformers",
+        "Qwen3VLProcessor"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "processor",
+      "variant": null,
+      "revision": null
+    }
+  ],
+  "vae": [
+    "diffusers",
+    "AutoencoderKLMiniMaxH3",
+    {
+      "type_hint": [
+        "diffusers",
+        "AutoencoderKLMiniMaxH3"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "vae",
+      "variant": null,
+      "revision": null
+    }
+  ],
+  "audio_vae": [
+    "diffusers",
+    "AutoencoderKLMiniMaxH3Audio",
+    {
+      "type_hint": [
+        "diffusers",
+        "AutoencoderKLMiniMaxH3Audio"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "audio_vae",
+      "variant": null,
+      "revision": null
+    }
+  ],
+  "transformer": [
+    "diffusers",
+    "MiniMaxH3Transformer3DModel",
+    {
+      "type_hint": [
+        "diffusers",
+        "MiniMaxH3Transformer3DModel"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "transformer",
+      "variant": null,
+      "revision": null
+    }
+  ],
+  "transformer_ref": [
+    "diffusers",
+    "MiniMaxH3Transformer3DModel",
+    {
+      "type_hint": [
+        "diffusers",
+        "MiniMaxH3Transformer3DModel"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "transformer_ref",
+      "variant": null,
+      "revision": null
+    }
+  ],
+  "scheduler": [
+    "diffusers",
+    "MiniMaxH3Scheduler",
+    {
+      "type_hint": [
+        "diffusers",
+        "MiniMaxH3Scheduler"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "scheduler",
+      "variant": null,
+      "revision": null
+    }
+  ],
+  "audio_scheduler": [
+    "diffusers",
+    "MiniMaxH3Scheduler",
+    {
+      "type_hint": [
+        "diffusers",
+        "MiniMaxH3Scheduler"
+      ],
+      "pretrained_model_name_or_path": "MiniMaxAI/MiniMax-H3",
+      "subfolder": "audio_scheduler",
+      "variant": null,
+      "revision": null
+    }
+  ]
+}
