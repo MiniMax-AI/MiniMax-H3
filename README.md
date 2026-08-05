@@ -1,3 +1,7 @@
+<div align="center">
+  <img width="100%" src="assets/minimax-h3.png" alt="MiniMax">
+</div>
+
 <p align="center">
   <a href="https://hailuoai.video" target="_blank"><img src="https://img.shields.io/badge/Hailuo%20AI-FF6C37?logo=minimax&logoColor=white" alt="Hailuo AI"></a>
   <a href="https://platform.minimax.io/docs/guides/text-generation" target="_blank"><img src="https://img.shields.io/badge/API-FF6C37?logo=minimax&logoColor=white" alt="API"></a>
@@ -42,6 +46,8 @@ H3 supports the following input and output specifications:
 | H3-Base-FL2VA | First-and-last-frame mode | Supports zero, one, or two input images. <br><br>- No image input: Text-to-video mode <br>- One image input: First-frame-to-video or last-frame-to-video generation <br>- Two image inputs: First-and-last-frame-to-video generation |
 | H3-Base-Ref2VA | Omni-reference mode | Supports multi-modal reference inputs: <br><br>- **Images:** ≤ 9 images <br>- **Videos:** ≤ 3 clips; each clip must be 2–15 seconds long; total duration ≤ 15 seconds <br>- **Audio:** ≤ 3 clips; audio must be accompanied by image or video input and cannot be used as the sole input; each clip must be 2–15 seconds long; total duration ≤ 15 seconds <br>- **Mixed inputs:** Maximum number of files across all input types is 12 |
 
+![Image](assets/overview.png)
+
 The complete H3 system consists of the following three modules:
 - H3-Context-IR: As inputs become increasingly complex, we build a dedicated system to deeply understand and refine the input multimodal instructions, then convert them into a form that H3 can readily understand—the Context Intermediate Representation—for generation. **H3-Context-IR is critical to the quality of the final output, so we strongly recommend incorporating it into your generation pipeline or following the “Prompting Guidance” to build your own context-processing system.**
 - H3-Base: Generates audio and video based on the H3-Context-IR output, producing results at 768p resolution.
@@ -66,6 +72,8 @@ For detailed usage instructions, see **Recommended Workflow — Full 2K Workflow
 User\-submitted text, images and videos, as well as enhanced prompts, are subject to automated moderation\. Content suspected of being unlawful, pornographic, or infringing third\-party rights may be blocked\. We use industry\-standard filtering measures but cannot eliminate false positives or false negatives\. These guardrails do not affect the Licensee’s obligations under the MiniMax H3 Community License, especially those relating to lawful use and use restrictions\.
 
 ### H3\-Base
+
+![Image](assets/full-arch.png)
 
 #### Architecture Overview
 
@@ -217,9 +225,9 @@ The following three use cases T2VA, FL2VA, and Ref2VA demonstrate how to reprodu
 
 | Use case | Request | Result |
 |---|---|---|
-| T2VA | [View script](scripts/readme/reproducible-768p-t2va-request.sh) | - |
-| FL2VA | [View script](scripts/readme/reproducible-768p-fl2va-request.sh) | - |
-| Ref2VA | [View script](scripts/readme/reproducible-768p-ref2va-request.sh) | - |
+| T2VA | [View script](scripts/readme/reproducible-768p-t2va-request.sh) | [t2va.mp4](assets/t2va.mp4) |
+| FL2VA | [View script](scripts/readme/reproducible-768p-fl2va-request.sh) | [fl2va.mp4](assets/fl2va.mp4) |
+| Ref2VA | [View script](scripts/readme/reproducible-768p-ref2va-request.sh) | [ref2va.mp4](assets/ref2va.mp4) |
 
 ### Full 2K\-Workflow
 
@@ -284,10 +292,10 @@ For each case below, we provide reference outputs at both 2K and 768p generated 
     &quot;modality&quot;: &quot;text&quot;
   }
 }</code></pre></td></tr>
-    <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-t2va-h3-base.sh">View script</a></td><td>-</td></tr>
-    <tr><td>H3-Regenerate-2K</td><td><a href="scripts/readme/full-2k-t2va-h3-regenerate-2k.sh">View script</a></td><td>-</td></tr>
-    <tr><td>Reference 2K result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-t2va-reference-2k-result-by-directly-calling-open-platform-api.sh">View script</a></td><td>-</td></tr>
-    <tr><td>Reference 768P result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-t2va-reference-768p-result-by-directly-calling-open-platform-api.sh">View script</a></td><td>-</td></tr>
+    <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-t2va-h3-base.sh">View script</a></td><td><a href="assets/t2va.mp4">t2va.mp4</a></td></tr>
+    <tr><td>H3-Regenerate-2K</td><td><a href="scripts/readme/full-2k-t2va-h3-regenerate-2k.sh">View script</a></td><td><a href="assets/t2va_2k.mp4">t2va_2k.mp4</a></td></tr>
+    <tr><td>Reference 2K result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-t2va-reference-2k-result-by-directly-calling-open-platform-api.sh">View script</a></td><td><a href="assets/h3_direct_2k.mp4">h3_direct_2k.mp4</a></td></tr>
+    <tr><td>Reference 768P result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-t2va-reference-768p-result-by-directly-calling-open-platform-api.sh">View script</a></td><td><a href="assets/h3_direct_768p.mp4">h3_direct_768p.mp4</a><br></td></tr>
   </tbody>
 </table>
 
@@ -323,10 +331,10 @@ For each case below, we provide reference outputs at both 2K and 768p generated 
     &quot;modality&quot;: &quot;text&quot;
   }
 }</code></pre></td></tr>
-    <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-i2va-h3-base.sh">View script</a></td><td>-</td></tr>
-    <tr><td>H3-Regenerate-2K</td><td><a href="scripts/readme/full-2k-i2va-h3-regenerate-2k.sh">View script</a></td><td>-</td></tr>
-    <tr><td>Reference 2K result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-i2va-reference-2k-result-by-directly-calling-open-platform-api.sh">View script</a></td><td>-</td></tr>
-    <tr><td>Reference 768P result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-i2va-reference-768p-result-by-directly-calling-open-platform-api.sh">View script</a></td><td>-</td></tr>
+    <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-i2va-h3-base.sh">View script</a></td><td><a href="assets/i2va.mp4">i2va.mp4</a></td></tr>
+    <tr><td>H3-Regenerate-2K</td><td><a href="scripts/readme/full-2k-i2va-h3-regenerate-2k.sh">View script</a></td><td><a href="assets/i2va_2k.mp4">i2va_2k.mp4</a><br></td></tr>
+    <tr><td>Reference 2K result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-i2va-reference-2k-result-by-directly-calling-open-platform-api.sh">View script</a></td><td><a href="assets/i2va_direct_2k.mp4">i2va_direct_2k.mp4</a></td></tr>
+    <tr><td>Reference 768P result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-i2va-reference-768p-result-by-directly-calling-open-platform-api.sh">View script</a></td><td><a href="assets/i2va_direct_768p.mp4">i2va_direct_768p.mp4</a></td></tr>
   </tbody>
 </table>
 
@@ -362,10 +370,10 @@ For each case below, we provide reference outputs at both 2K and 768p generated 
     &quot;modality&quot;: &quot;text&quot;
   }
 }</code></pre></td></tr>
-    <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-ref2va-h3-base.sh">View script</a></td><td>-</td></tr>
-    <tr><td>Reference 2K result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-ref2va-reference-2k-result-by-directly-calling-open-platform-api.sh">View script</a></td><td>-</td></tr>
-    <tr><td>H3 API 2K in Open Platform for reference</td><td><a href="scripts/readme/full-2k-ref2va-h3-api-2k-in-open-platform-for-reference.sh">View script</a></td><td>-</td></tr>
-    <tr><td>Reference 768P result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-ref2va-reference-768p-result-by-directly-calling-open-platform-api.sh">View script</a></td><td>-</td></tr>
+    <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-ref2va-h3-base.sh">View script</a></td><td><a href="assets/r2va.mp4">r2va.mp4</a><br></td></tr>
+    <tr><td>Reference 2K result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-ref2va-reference-2k-result-by-directly-calling-open-platform-api.sh">View script</a></td><td><a href="assets/r2va_2k.mp4">r2va_2k.mp4</a></td></tr>
+    <tr><td>H3 API 2K in Open Platform for reference</td><td><a href="scripts/readme/full-2k-ref2va-h3-api-2k-in-open-platform-for-reference.sh">View script</a></td><td><a href="assets/r2va_direct_2k.mp4">r2va_direct_2k.mp4</a><br></td></tr>
+    <tr><td>Reference 768P result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-ref2va-reference-768p-result-by-directly-calling-open-platform-api.sh">View script</a></td><td><a href="assets/r2va_direct_768p.mp4">r2va_direct_768p.mp4</a><br></td></tr>
   </tbody>
 </table>
 
