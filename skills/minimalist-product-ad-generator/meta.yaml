@@ -1,0 +1,19 @@
+display-name-zh: 极简产品广告生成器
+version: 0.5.6
+tag-en: "Commercial Ad"
+tag-cn: "商业广告"
+complete-tags-en:
+  - "Commercial Ad / Planning"
+  - "Commercial Ad / Creative Generation"
+  - "E-Commerce / Creative Generation"
+complete-tags-cn:
+  - "商业广告 / 策划"
+  - "商业广告 / 创作生成"
+  - "电商 / 创作生成"
+summary-en: "Turn product images and ad requirements into minimalist product ad shorts for e-commerce promotion and product launches."
+summary-cn: "基于产品图片和广告需求，完成卖点提炼、英文文案与节拍分镜设计，输出极简产品广告短片，适用于电商推广与新品发布。"
+desc-en: "Based on product images and advertising requirements, extract selling points, write concise English ad copy, design product anchors and beat-synced storyboards, then generate a minimalist product advertising short for e-commerce promotion, product launches, small brands, food, toys, gadgets, accessories, and other physical goods. The Skill focuses on clean product presentation, readable typography rhythm, premium camera language, and final video delivery."
+desc-cn: "基于产品图片和广告需求，完成卖点提炼、英文文案与节拍分镜设计，输出极简产品广告短片。适用于电商推广、新品发布、小品牌上新、食品、潮玩、数码配件和其他实体产品。Skill 会确认时长与比例，整理产品事实和主推卖点，生成简洁英文广告文案，制作产品锚定图，规划文字卡点分镜，并生成干净、有节奏、产品质感突出的成片。"
+author-en: "User"
+author-cn: "用户"
+source: community

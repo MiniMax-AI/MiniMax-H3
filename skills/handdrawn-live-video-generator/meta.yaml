@@ -1,0 +1,17 @@
+display-name-zh: 手绘实拍融合视频生成器
+version: 1.0.2
+tag-en: "Creative & Experimental"
+tag-cn: "创意实验"
+complete-tags-en:
+  - "Creative & Experimental / Creative Generation"
+  - "Animation / Creative Generation"
+complete-tags-cn:
+  - "创意实验 / 创作生成"
+  - "动画 / 创作生成"
+summary-en: "Create H3-ready prompts for hand-drawn animation interacting with live-action scenes."
+summary-cn: "基于场景创意，生成手绘动画与实拍接触变形的15秒视频，适用于创意短片制作。"
+desc-en: "For creators making surreal short videos that blend rough glowing hand-drawn animation with real-world footage. Users provide a scene idea, contact object or hand, desired mood, and optional language or style constraints. The Skill clarifies the interaction, designs continuous morphing and chase action, writes a reusable 15-second 16:9 video prompt in the user's language, recommends MiniMax H3 after confirmation, and checks contact realism, camera delay, texture, and non-horror tone. Best for single-scene creative clips, not polished CG, horror jump scares, plush characters, or multi-scene editing."
+desc-cn: "面向希望制作手绘动画与实拍空间融合短片的创作者。用户提供场景创意、接触对象或手部动作、情绪氛围和可选风格限制。Skill 会明确触碰关系，设计连续变形、逃跑路线和慢半拍手持追拍，整理为用户输入语言的15秒16:9视频提示词；确认后建议使用 MiniMax H3 生成，并检查接触真实感、镜头延迟、笔触质感和非恐怖调性。适合单场景创意视频，不适合精致CG、恐怖跳吓、毛绒角色或多场景剪辑。"
+author-en: MiniMax Hub User
+author-cn: MiniMax Hub 用户
+source: official-featured

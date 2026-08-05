@@ -1,0 +1,19 @@
+display-name-zh: 音乐MV动态字幕生成器
+version: 0.6.6
+tag-en: "Sound & Music"
+tag-cn: "音频音乐"
+complete-tags-en:
+  - "Sound & Music / Planning"
+  - "Sound & Music / Creative Generation"
+  - "Creative & Experimental / Creative Generation"
+complete-tags-cn:
+  - "音频音乐 / 计划制定"
+  - "音频音乐 / 创作生成"
+  - "创意实验 / 创作生成"
+summary-en: "Create beat-synced MV prompts and lyric typography plans from music and lyrics."
+summary-cn: "基于音乐和歌词，完成节奏拆解、镜头设计与动态字幕方案，适用于AI MV创作。"
+desc-en: "For musicians, video creators, and social-media editors producing AI music videos or emotional short films with lyric typography. Users provide music, lyrics, references, characters, typography direction, mood, or target platform. The Skill analyzes beat and vocal timing, separates character, scene, and text references, designs beat-reactive spatial typography, decomposes long works into connected shots, audits prompts, and routes generation for H3 or other video tools. It outputs MV concepts, shot prompts, lyric text plans, and stitching guidance. Best for stylized MVs and subtitle-driven music visuals, not ordinary caption cleanup, licensed IP copying, or fully manual post-production editing."
+desc-cn: "面向音乐人、视频创作者和社交媒体剪辑者，用于制作带歌词贴字的 AI MV 或情绪短片。用户提供音乐、歌词、参考图、角色、字体方向、情绪意图或发布平台。Skill 会分析节拍与人声时序，区分人物、场景和文字参考，设计随节奏变化的空间字幕，拆解长视频为可衔接镜头，审查提示词并路由 H3 等视频生成工具。最终输出 MV 概念、分镜提示词、歌词文字方案和拼接建议。适合风格化音乐视觉，不适合普通字幕校对、照搬已有 IP 或完全手工后期剪辑。"
+author-en: "MiniMax Hub User"
+author-cn: "MiniMax Hub 用户"
+source: official-featured

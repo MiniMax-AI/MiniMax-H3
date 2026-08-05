@@ -1,0 +1,19 @@
+display-name-zh: 纸拼贴讲解动画生成器
+version: 0.3.9
+tag-en: "Education"
+tag-cn: "教育"
+complete-tags-en:
+  - "Education / Full Production"
+  - "Animation / Creative Generation"
+  - "Creative & Experimental / Creative Generation"
+complete-tags-cn:
+  - "教育 / 成片制作"
+  - "动画 / 创作生成"
+  - "创意实验 / 创作生成"
+summary-en: "Turn narration or abstract ideas into tactile paper-collage explainer animations."
+summary-cn: "基于文案或抽象概念，完成隐喻设计、拼贴分镜和动画生成，适用于讲解类内容。"
+desc-en: "For creators, educators, and social-video editors who need a tactile visual language for narration, knowledge points, opinions, or abstract topics. Users provide source copy, story beats, or a core concept, with optional aspect ratio, duration, palette, and audio needs. The Skill extracts meaning, proposes visual metaphors, prepares a production plan and storyboard, generates approval-ready halftone collage stills, then creates stop-motion clips with paper movement and tactile sound effects. It delivers cohesive paper-collage animation assets or an assembled explainer video, and is not intended for realistic presenter ads, precisely editable layer files, complex typography systems, or prompt-only handoff."
+desc-cn: "面向内容创作者、教育讲解者和社交视频编辑，用触感纸拼贴语言表现口播句、知识点、观点或抽象主题。用户提供短文案、故事节点或核心概念，也可补充画幅、时长、色调和音频需求。Skill 会提炼含义与视觉隐喻，制定制作方案和分镜，生成可确认的半调纸拼贴静帧，再制作带纸片滑入、弹入、轻敲、压平和摩擦声的停格动画片段。最终交付统一的纸拼贴动画素材或完整讲解视频，不适合真人口播广告、精确可编辑图层、复杂文字排版或仅输出提示词。"
+author-en: "MiniMax Hub"
+author-cn: "MiniMax Hub"
+source: official-featured

@@ -1,0 +1,19 @@
+display-name-zh: 3D动画短片生成器
+version: 0.5.4
+tag-en: Animation
+tag-cn: 动画
+complete-tags-en:
+- Animation / Planning
+- Animation / Creative Generation
+- Animation / Post-production
+complete-tags-cn:
+- 动画 / 计划制定
+- 动画 / 创作生成
+- 动画 / 后期制作
+summary-en: Turn a story idea into a complete stylized 3D animated short.
+summary-cn: 根据故事创意，完成人物与场景设定、镜头规划、分镜生成和视频合成，输出风格统一的3D动画短片。
+desc-en: Designed for creators who want to turn a story idea into a complete stylized 3D animated short. Users provide a one-line concept or basic plot and confirm aspect ratio, duration, dialogue needs, and visual direction. The Skill creates a project brief and story outline, builds labeled character and environment-only scene cards, plans a shot table with per-second action, camera, audio, and continuity requirements, produces text storyboards or optional pencil boards, selects a video model, generates individual shots, assembles the film, matches BGM, and performs a final review. It outputs a coherent 3D animated short with consistent characters, continuous scenes, and controlled pacing. Best for narrative animation, birthday keepsakes, brand stories, and social shorts; not for single images, simple retouching, photorealistic live action, or one standalone clip.
+desc-cn: 面向希望将故事灵感制作成完整3D动画短片的创作者。用户需提供一句故事创意或基础剧情，并确认画面比例、总时长、对白需求和目标风格。Skill 会依次完成项目简报与故事大纲，生成角色卡和无人物场景卡，规划带每秒动作、镜头、音频与连续性要求的镜头表，制作文本分镜或可选铅笔分镜，再选择视频模型生成单镜头片段，完成全片拼接、BGM匹配和成片复查。最终输出角色一致、场景连续、节奏完整的3D动画短片。适用于剧情动画、生日纪念、品牌故事和社交媒体短片，不适用于单张图片、简单修图、真人写实视频或仅生成一个独立镜头。
+author-en: MiniMax Hub User
+author-cn: MiniMax Hub 用户
+source: community

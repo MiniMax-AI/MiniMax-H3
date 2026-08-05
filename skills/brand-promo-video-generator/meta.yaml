@@ -1,0 +1,19 @@
+display-name-zh: 品牌宣传短片生成器
+version: 0.1.9
+tag-en: Commercial Ad
+tag-cn: 商业广告
+complete-tags-en:
+- Commercial Ad / Planning
+- Commercial Ad / Creative Generation
+- Commercial Ad / Post-production
+complete-tags-cn:
+- 商业广告 / 计划制定
+- 商业广告 / 创作生成
+- 商业广告 / 后期处理
+summary-en: Turn verified brand assets and campaign goals into a polished promotional short video.
+summary-cn: 基于品牌素材与推广目标，完成事实核验、创意方向、分镜和音画合成，输出可展示的品牌宣传短片。
+desc-en: For marketers and creators producing promotional content for brands, products, websites, apps, shops, or personal projects. Users provide logos, product images, interface screenshots, official links, or other verifiable assets and confirm duration, aspect ratio, audience, and campaign focus. The Skill organizes brand facts and asset provenance, selects a narrative direction, plans precise beats and shots, generates needed imagery, video, voiceover, or music, and completes assembly and pre-delivery review. It outputs a promotional short that highlights product capabilities, use cases, and a call to action. Best for launches, website showcases, and social promotion; not for imitating real brand marks without authorized assets, inventing product claims, or producing long-form narrative films.
+desc-cn: 面向需要为品牌、产品、网站、App、小店或个人项目制作宣传内容的运营与创作者。用户需提供 LOGO、产品图、界面截图、官网链接或其他可核验素材，并确认时长、画幅、受众和推广重点。Skill 会整理品牌事实与素材来源，选择叙事方向，规划精确节拍和镜头，生成所需图像、视频、旁白或音乐，并完成合成与交付前检查。最终输出一条突出产品功能、使用场景和行动号召的品牌宣传短片。适用于新品发布、官网展示和社交媒体推广，不适用于缺少授权素材时仿造真实品牌标识、虚构产品功能或制作长篇剧情影片。
+author-en: MiniMax Hub
+author-cn: MiniMax Hub
+source: official-featured

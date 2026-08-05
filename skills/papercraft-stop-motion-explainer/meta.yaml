@@ -1,0 +1,19 @@
+display-name-zh: 纸艺定格科普视频生成器
+version: 0.6.5
+tag-en: Education
+tag-cn: 教育
+complete-tags-en:
+- Education / Creative Generation
+- Animation / Creative Generation
+- Creative & Experimental / Creative Generation
+complete-tags-cn:
+- 教育 / 创作生成
+- 动画 / 创作生成
+- 创意实验 / 创作生成
+summary-en: Build a production-ready papercraft stop-motion explainer package from a knowledge topic.
+summary-cn: 根据知识主题，完成纸偶、分层布景、分镜与提示词设计，输出可执行的纸艺定格科普视频创作包。
+desc-en: For creators explaining science, education, or general knowledge through tactile handmade papercraft visuals. Users provide a topic, core knowledge points, or source material and may specify audience, duration, aspect ratio, and deliverable type. The Skill extracts the learning goal and visual metaphor, proposes creative directions, designs paper characters, layered diorama sets, and props, creates preview concepts plus image and video prompts, and plans storyboards, camera movement, transitions, and sound with staged approvals and review checklists. It outputs a production-ready papercraft stop-motion explainer package, or selected assets such as still prompts, image-series prompts, short-video prompts, or storyboards. Best for cut-paper, pop-up-book, layered diorama, and miniature stop-motion explainers; not for standard 2D cartoons, line doodles, live action, or explainers without a paper-art look.
+desc-cn: 面向希望用手工纸艺视觉讲解科学、教育或泛知识内容的创作者。用户需提供主题、核心知识点或原始材料，并可指定受众、时长、画幅和交付类型。Skill 会先提炼学习目标与视觉隐喻，提出创意方向，设计纸偶角色、分层纸雕布景和道具资产，制作预览概念、图像与视频提示词，规划分镜、运镜、转场和声音，并通过阶段确认与审核清单控制质量。最终输出可直接进入制作的纸艺定格科普视频创作包，也可按需交付单图、系列图、短视频提示词或分镜。适用于纸雕、剪纸、立体书和微缩定格讲解，不适用于普通二维卡通、线稿涂鸦、真人写实视频或无纸艺质感的标准科普。
+author-en: MiniMax Hub
+author-cn: MiniMax Hub
+source: official

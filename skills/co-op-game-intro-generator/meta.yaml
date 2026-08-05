@@ -1,0 +1,15 @@
+display-name-zh: 双人游戏开场视频生成器
+version: 0.1.5
+tag-en: Creative & Experimental
+tag-cn: 创意实验
+complete-tags-en:
+- Creative & Experimental / Creative Generation
+complete-tags-cn:
+- 创意实验 / 创作生成
+summary-en: Create a co-op game intro from player details, character references, and an approved menu style.
+summary-cn: 根据玩家信息、角色参考图和视觉风格，完成首图确认与界面动效设计，输出双人游戏开场视频。
+desc-en: For users creating a two-player co-op game menu or opening animation. Users provide two player names, a game title, a target visual style, and optional character reference images. The Skill locks identity cues, generates an approval image from a fixed menu framework with coordinated color, buttons, icons, and typography, then uses the approved result to rebuild the character, UI-copy, and event timing instructions for the final video. It outputs a co-op game intro featuring two characters, player cards, and menu interaction motion. Best for game concepts, character-led menus, and social content; not for playable game development, complex multi-page UI, exact brand-logo replication, or generic character-free title sequences.
+desc-cn: 面向想制作双人合作游戏主菜单或开场动画的用户。用户需提供两位玩家名称、游戏名称、目标视觉风格，并可上传角色参考图。Skill 会先锁定人物身份特征，基于固定菜单布局生成与色彩、按钮、图标和字体联动的确认首图；用户确认后，回填角色、界面文案和事件节奏，生成完整视频提示词并制作最终开场视频。最终输出一条包含双人角色、玩家信息卡和主菜单交互动效的游戏开场视频。适用于合作游戏概念展示、角色化菜单和社交内容，不适用于完整可玩游戏开发、复杂多页面 UI、精确品牌标识复刻或无角色的通用片头。
+author-en: MiniMax Hub
+author-cn: MiniMax Hub
+source: official
