@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="100%" src="assets/minimax-h3.png" alt="MiniMax">
+  <img width="100%" src="assets/minimax-h3-header.gif" alt="MiniMax H3">
 </div>
 
 <p align="center">
