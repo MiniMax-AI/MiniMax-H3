@@ -2,6 +2,10 @@
 
 This directory contains the skills bundled with [MiniMax H3](../README.md): **1 prompt writing skill** and **8 style-specific video generation skills**. Each skill lives in its own folder with an installable `SKILL.md` (plus a `SKILL.cn.md` Chinese version for the style skills) and any reference materials it needs.
 
+## Status
+
+The skills are actively maintained and still evolving. The 8 style skills ship with bilingual `SKILL.md`/`SKILL.cn.md`; `h3-prompt-writing` is currently English-only.
+
 ## Installation
 
 Install skills with the [skills CLI](https://github.com/vercel-labs/skills):
@@ -69,6 +73,8 @@ For marketers and creators producing promotional content for brands, products, w
 [SKILL.md](brand-promo-video-generator/SKILL.md) · [SKILL.cn.md](brand-promo-video-generator/SKILL.cn.md)
 
 ### music-video-subtitle-generator
+
+Installable under the name `music-video-subtitle-generator` (folder: `mv-subtitle-skill-confirmed`).
 
 <p align="center">
   <img src="../assets/music-video-subtitle-generator.gif" alt="music-video-subtitle-generator" width="240">
