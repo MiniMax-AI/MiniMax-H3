@@ -2,6 +2,10 @@
 
 This directory contains the skills bundled with [MiniMax H3](../README.md): **1 prompt writing skill** and **8 style-specific video generation skills**. Each skill lives in its own folder with an installable `SKILL.md` (plus a `SKILL.cn.md` Chinese version for the style skills) and any reference materials it needs.
 
+## Status
+
+The skills are actively maintained and still evolving. The 8 style skills ship with bilingual `SKILL.md`/`SKILL.cn.md`; `h3-prompt-writing` is currently English-only.
+
 ## Installation
 
 Install skills with the [skills CLI](https://github.com/vercel-labs/skills):
@@ -70,6 +74,8 @@ For marketers and creators producing promotional content for brands, products, w
 
 ### music-video-subtitle-generator
 
+Installable under the name `music-video-subtitle-generator` (folder: `mv-subtitle-skill-confirmed`).
+
 <p align="center">
   <img src="../assets/music-video-subtitle-generator.gif" alt="music-video-subtitle-generator" width="240">
 </p>
@@ -107,3 +113,7 @@ Give narration, knowledge points, opinions, or abstract topics a tactile paper-c
 Create surreal short videos that blend rough glowing hand-drawn animation with live-action spaces. The skill clarifies the physical contact, designs continuous morphing, an escape route, and a delayed handheld chase movement, then writes a reusable 15-second 16:9 video prompt in the user's language. After confirmation it recommends MiniMax H3 generation and checks contact realism, camera delay, rough glowing stroke texture, and non-horror tone. Best for single-scene creative clips, not polished CG, horror jump scares, plush characters, or multi-scene cuts.
 
 [SKILL.md](handdrawn-live-video-generator/SKILL.md) · [SKILL.cn.md](handdrawn-live-video-generator/SKILL.cn.md)
+
+## Contribute
+
+These skills are still being improved, and community contributions are encouraged. If you optimize an existing skill or add a new one, open a PR — contributing or optimizing skills comes with API credit rewards.
