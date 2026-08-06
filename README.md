@@ -48,7 +48,7 @@ Use MiniMax\-H3 directly via API\.
 
 ## Online App
 Use MiniMax\-H3 directly via App\.
-- WebApp Global: [hailuoai\.video]([https://hailuoai.video](https://hailuoai.video/tools/minimax-h3)) \| CN: [hailuoai\.com](https://hailuoai.com/)
+- WebApp Global: [hailuoai\.video]([https://hailuoai.video](https://hailuoai.video/tools/minimax-h3) \| CN: [hailuoai\.com](https://hailuoai.com/)
 - Desktop Global: [hub\.minimax\.io](https://hub.minimax.io/) \| CN: [hub\.minimaxi\.com](https://hub.minimaxi.com/)
 
 
