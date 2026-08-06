@@ -42,6 +42,18 @@ It ships with two prompt guides under `skills/h3-prompt-writing/references/`: `b
   </tr>
 </table>
 
+## Contribute to Skills
+
+The skills in this repository are still being polished, and we welcome community contributions. If you find room to optimize an existing skill — better prompts, stronger workflows, new references, bug fixes, or even a brand-new skill — feel free to open a pull request.
+
+Contributing or optimizing skills comes with rewards: qualifying PRs earn API credits on the MiniMax platform. To get started:
+
+1. Fork the repository and create a feature branch.
+2. Improve a skill under [`skills/`](skills/README.md) or add a new one.
+3. Open a pull request — keeping one skill per PR makes review and merging easier.
+
+We review contributions on a rolling basis. Thank you for helping make H3 skills better for everyone!
+
 ## Online API
 Use MiniMax\-H3 directly via API\. 
 - Global: [platform\.minimax\.io](https://platform.minimax.io/docs/api-reference/video-generation-v2-create) \| CN: [platform\.minimaxi\.com](https://platform.minimaxi.com/docs/api-reference/video-generation-v2-create)
