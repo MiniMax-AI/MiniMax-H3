@@ -6,6 +6,17 @@ This directory contains the skills bundled with [MiniMax H3](../README.md): **1 
 
 The skills are actively maintained and still evolving. The 8 style skills ship with bilingual `SKILL.md`/`SKILL.cn.md`; `h3-prompt-writing` is currently English-only.
 
+## Keeping the h3-prompt-writing copies in sync
+
+`h3-prompt-writing` is mirrored to three locations so it works out of the box for
+different agent harnesses: the canonical copy in `skills/h3-prompt-writing/`, plus
+install copies in `.claude/skills/h3-prompt-writing/` and `.agents/skills/h3-prompt-writing/`.
+After editing the canonical copy, sync the other two with:
+
+```bash
+./scripts/sync-skill-copies.sh
+```
+
 ## Installation
 
 Install skills with the [skills CLI](https://github.com/vercel-labs/skills):
