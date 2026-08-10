@@ -32,11 +32,7 @@ Install the H3 prompt writing skill — one of nine skills bundled with this rep
 npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing
 ```
 
-It ships with two prompt guides under `skills/h3-prompt-writing/references/`: `base-en.txt` for text/keyframe modes and `ref-en.txt` for full-reference (Ref2VA) mode.
-
-**Agent compatibility:** `h3-prompt-writing` is a plain Markdown + reference-file skill with no external API calls, so it works in Claude Code, the Claude Agent SDK, Cursor, Windsurf, OpenAI-based agents/Codex, LangChain, or any other harness that can read a `SKILL.md` and local files. The bundled `skills/h3-prompt-writing/agents/openai.yaml` only adds optional UI metadata (display name, description, default prompt) for the ChatGPT/Codex skills UI, per [OpenAI's skill spec](https://learn.chatgpt.com/docs/build-skills) — it does not limit the skill to OpenAI agents.
-
-The remaining eight are style-specific video generation skills built for the MiniMax Hub's canvas workflow (`hub_generate_video`, `hub_generate_image`, canvas nodes, choice cards, etc.) and are not portable to generic agent harnesses:
+It ships with two prompt guides under `skills/h3-prompt-writing/references/`: `base-en.txt` for text/keyframe modes and `ref-en.txt` for full-reference (Ref2VA) mode. The remaining eight are style-specific video generation skills:
 
 <table align="center">
   <tr>
