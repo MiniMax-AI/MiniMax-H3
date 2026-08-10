@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 set -euo pipefail
 
 # Create the H3-Base request with the expanded prompt and capture the video ID.
@@ -27,7 +27,7 @@ video_id=$(
   },
   "seed": 0
 }' |
-    curl --silent --show-error \
+    curl --fail-with-body --silent --show-error \
       --request POST \
       --url "$SGLANG_DEPLOYMENT_URL/v1/videos" \
       --header 'Content-Type: application/json' \
@@ -35,12 +35,12 @@ video_id=$(
     jq -er '.id'
 )
 # Query the generation status.
-curl --silent --show-error \
+curl --fail-with-body --silent --show-error \
   --request GET \
   --url "$SGLANG_DEPLOYMENT_URL/v1/videos/$video_id" |
   jq '{status}'
 # Download the local H3-Base MP4 after its status becomes completed.
-curl --silent --show-error \
+curl --fail-with-body --silent --show-error \
   --request GET \
   --url "$SGLANG_DEPLOYMENT_URL/v1/videos/$video_id/content" \
   --output r2va.mp4

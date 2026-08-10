@@ -49,11 +49,11 @@ def kaiser_sinc_filter1d(cutoff, half_width, kernel_size):  # return filter [1,1
         filter_ = torch.zeros_like(time)
     else:
         filter_ = 2 * cutoff * window * sinc(2 * cutoff * time)
-        """
-        Normalize filter to have sum = 1, otherwise we will have a small leakage of the constant component in the input signal.
-        """
+        # Normalize filter to have sum = 1, otherwise we will have a small
+        # leakage of the constant component in the input signal.
         filter_ /= filter_.sum()
-        filter = filter_.view(1, 1, kernel_size)
+    # Always reshape into [1, 1, kernel_size] so the return is never undefined.
+    filter = filter_.view(1, 1, kernel_size)
 
     return filter
 

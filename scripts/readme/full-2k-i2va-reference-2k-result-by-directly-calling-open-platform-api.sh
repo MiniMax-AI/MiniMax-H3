@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 set -euo pipefail
 
 # Create an 8-second 2K FL2VA video directly and capture its runtime task ID.

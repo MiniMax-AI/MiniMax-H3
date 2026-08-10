@@ -53,6 +53,7 @@
       5
     ]
   ],
+  "sample_rate": 32000,
   "sampling_rate": 32000,
   "latents_mean": [
     -0.020211687488382354,

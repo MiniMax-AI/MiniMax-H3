@@ -215,6 +215,68 @@ hf download MiniMaxAI/MiniMax-H3 --include "model_index.json" "FL2VA/*" "Ref2VA/
 hf download MiniMaxAI/MiniMax-H3 --include "model_index.json" "FL2VA/*" --local-dir MiniMax-H3
 ```
 
+#### Required Model Weights & Download Instructions
+
+> **Important:** This repository contains only code and configuration files.
+> The model weights (`.safetensors` files) are hosted separately on Hugging Face
+> and must be downloaded before running inference.
+
+**Step 1 — Install dependencies**
+
+```bash
+pip install -r requirements.txt
+# For SGLang / vLLM, also install the respective package as documented in the
+# framework sections below.
+```
+
+**Step 2 — Download the weights**
+
+```bash
+# Install the Hugging Face CLI if needed:
+pip install huggingface_hub
+
+# Download FL2VA checkpoint (T2VA + FL2VA tasks):
+hf download MiniMaxAI/MiniMax-H3 \
+  --include "model_index.json" "modular_model_index.json" \
+  --include "FL2VA/**" \
+  --include "vae/**" "audio_vae/**" "scheduler/**" "audio_scheduler/**" \
+  --local-dir ./MiniMax-H3
+
+# Download Ref2VA checkpoint additionally:
+hf download MiniMaxAI/MiniMax-H3 \
+  --include "Ref2VA/**" \
+  --local-dir ./MiniMax-H3
+```
+
+**Step 3 — Verify the download**
+
+After downloading, confirm the key weight files exist:
+
+```bash
+# FL2VA transformer weights (largest file — ~67 GB total for all shards)
+ls MiniMax-H3/FL2VA/transformer/model-*.safetensors
+
+# Audio VAE weights
+ls MiniMax-H3/FL2VA/audio_vae/*.safetensors
+
+# Visual VAE weights
+ls MiniMax-H3/FL2VA/vae/*.safetensors
+```
+
+If any files are missing, re-run the `hf download` command above. The `hf` CLI
+is resumable — it will skip files that are already complete.
+
+**Step 4 — Run inference**
+
+Once weights are downloaded, follow the SGLang, vLLM, or diffusers workflows
+documented in the sections below. For a quick smoke-test using the reproducible
+768p scripts, set your `SGLANG_DEPLOYMENT_URL` and run:
+
+```bash
+bash scripts/readme/reproducible-768p-t2va-request.sh
+```
+
+
 diffusers users do not need a manual download: `ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-H3")` fetches exactly the components it needs. See the [diffusers documentation](https://github.com/huggingface/diffusers/blob/minimax-h3/docs/source/en/api/pipelines/minimax_h3.md) for loading recipes.
 
 We recommend the following inference frameworks to serve the model:
