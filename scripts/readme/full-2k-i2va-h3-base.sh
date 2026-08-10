@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# I2VA is generated with the H3-Base "fl2va" task: the first-frame image is
+# passed as a keyframe condition (role "keyframe", frame_index 0) and the
+# model animates forward from it. There is no separate "i2va" task.
 # Create the H3-Base request with the expanded prompt and capture the video ID.
 video_id=$(
   jq -n \

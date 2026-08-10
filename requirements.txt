@@ -11,10 +11,22 @@
 # tighter if you need an exact CUDA build (e.g. torch==2.4.1+cu121).
 torch>=2.4.0
 
-# diffusers is required for the H3 pipeline / modular pipeline. The official
-# docs reference the `minimax-h3` branch of diffusers for the latest class
-# additions; once that lands on PyPI, tighten the upper bound accordingly.
-# Until then, install from source: `pip install "git+https://github.com/huggingface/diffusers.git@minimax-h3"`
+# diffusers is required for the H3 pipelines. There are two consumption paths:
+#
+# 1. FL2VA / Ref2VA checkpoints (the `MiniMaxH3Pipeline` schema, diffusers
+#    0.32.2): loaded with `trust_remote_code=True` from the Python source
+#    bundled in FL2VA/ and Ref2VA/ (video/audio VAE modules, DAC, BigVGAN).
+#    A PyPI diffusers release (>=0.32.2) is enough for this path.
+#
+# 2. Modular pipeline (`MiniMaxH3ModularPipeline` / `MiniMaxH3Transformer3DModel`
+#    / `AutoencoderKLMiniMaxH3` / `MiniMaxH3Scheduler`): these classes are not
+#    shipped on PyPI yet. They live on the official branch, so install diffusers
+#    from source:
+#      pip install "git+https://github.com/huggingface/diffusers.git@minimax-h3"
+#    Once they land on PyPI, tighten the upper bound accordingly.
+#
+# The version below keeps the `trust_remote_code` path working with PyPI
+# releases; override it if you need the modular pipeline.
 diffusers>=0.32.2
 
 # transformers provides the Qwen3-VL text encoder / processor / tokenizer used

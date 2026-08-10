@@ -343,6 +343,9 @@ For each case below, we provide reference outputs at both 2K and 768p generated 
 - Duration: 8 seconds
 - Aspect ratio: adaptive
 
+> Note: on H3-Base, I2VA is generated with the `fl2va` task by passing the
+> first-frame image as a keyframe condition (`role: "keyframe"`, `frame_index: 0`).
+
 <table>
   <thead>
     <tr><th>stage</th><th>request</th><th>result</th></tr>
