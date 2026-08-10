@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin /env bash 
 set -euo pipefail
 
 # Create the H3-Base request with the expanded prompt and capture the video ID.
