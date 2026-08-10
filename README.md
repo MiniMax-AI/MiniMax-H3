@@ -421,7 +421,7 @@ Prompting guidance documents from the HuggingFace release are not copied into th
 
 
 
-## License
+## License0
 
 MiniMax H3 is released under the [MiniMax H3 Community License Agreement](https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE).
 
