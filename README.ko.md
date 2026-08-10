@@ -405,7 +405,7 @@ API 문서:
   }
 }</code></pre></td></tr>
     <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-ref2va-h3-base.sh">스크립트 보기</a></td><td><a href="assets/r2va.mp4">r2va.mp4</a><br></td></tr>
-    <tr><td>Open Platform API 직접 호출로 생성한 2K 참조 결과</td><td><a href="scripts/readme/full-2k-ref2va-reference-2k-result-by-directly-calling-open-platform-api.sh">스크립트 보기</a></td><td><a href="assets/r2va_2k.mp4">r2va_2k.mp4</a></td></tr>
+    <tr><td>H3-Regenerate-2K</td><td><a href="scripts/readme/full-2k-ref2va-h3-regenerate-2k.sh">스크립트 보기</a></td><td><a href="assets/r2va_2k.mp4">r2va_2k.mp4</a></td></tr>
     <tr><td>참조용 Open Platform H3 API 2K 결과</td><td><a href="scripts/readme/full-2k-ref2va-h3-api-2k-in-open-platform-for-reference.sh">스크립트 보기</a></td><td><a href="assets/r2va_direct_2k.mp4">r2va_direct_2k.mp4</a><br></td></tr>
     <tr><td>Open Platform API 직접 호출로 생성한 768P 참조 결과</td><td><a href="scripts/readme/full-2k-ref2va-reference-768p-result-by-directly-calling-open-platform-api.sh">스크립트 보기</a></td><td><a href="assets/r2va_direct_768p.mp4">r2va_direct_768p.mp4</a><br></td></tr>
   </tbody>

@@ -405,7 +405,7 @@ API ドキュメント:
   }
 }</code></pre></td></tr>
     <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-ref2va-h3-base.sh">スクリプトを見る</a></td><td><a href="assets/r2va.mp4">r2va.mp4</a><br></td></tr>
-    <tr><td>Open Platform API を直接呼び出した 2K 参照結果</td><td><a href="scripts/readme/full-2k-ref2va-reference-2k-result-by-directly-calling-open-platform-api.sh">スクリプトを見る</a></td><td><a href="assets/r2va_2k.mp4">r2va_2k.mp4</a></td></tr>
+    <tr><td>H3-Regenerate-2K</td><td><a href="scripts/readme/full-2k-ref2va-h3-regenerate-2k.sh">スクリプトを見る</a></td><td><a href="assets/r2va_2k.mp4">r2va_2k.mp4</a></td></tr>
     <tr><td>参考用 Open Platform の H3 API 2K 結果</td><td><a href="scripts/readme/full-2k-ref2va-h3-api-2k-in-open-platform-for-reference.sh">スクリプトを見る</a></td><td><a href="assets/r2va_direct_2k.mp4">r2va_direct_2k.mp4</a><br></td></tr>
     <tr><td>Open Platform API を直接呼び出した 768P 参照結果</td><td><a href="scripts/readme/full-2k-ref2va-reference-768p-result-by-directly-calling-open-platform-api.sh">スクリプトを見る</a></td><td><a href="assets/r2va_direct_768p.mp4">r2va_direct_768p.mp4</a><br></td></tr>
   </tbody>

@@ -405,7 +405,7 @@ API 文档：
   }
 }</code></pre></td></tr>
     <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-ref2va-h3-base.sh">查看脚本</a></td><td><a href="assets/r2va.mp4">r2va.mp4</a><br></td></tr>
-    <tr><td>直接调用开放平台 API 的 2K 参考结果</td><td><a href="scripts/readme/full-2k-ref2va-reference-2k-result-by-directly-calling-open-platform-api.sh">查看脚本</a></td><td><a href="assets/r2va_2k.mp4">r2va_2k.mp4</a></td></tr>
+    <tr><td>H3-Regenerate-2K</td><td><a href="scripts/readme/full-2k-ref2va-h3-regenerate-2k.sh">查看脚本</a></td><td><a href="assets/r2va_2k.mp4">r2va_2k.mp4</a></td></tr>
     <tr><td>开放平台中的 H3 API 2K 参考结果</td><td><a href="scripts/readme/full-2k-ref2va-h3-api-2k-in-open-platform-for-reference.sh">查看脚本</a></td><td><a href="assets/r2va_direct_2k.mp4">r2va_direct_2k.mp4</a><br></td></tr>
     <tr><td>直接调用开放平台 API 的 768P 参考结果</td><td><a href="scripts/readme/full-2k-ref2va-reference-768p-result-by-directly-calling-open-platform-api.sh">查看脚本</a></td><td><a href="assets/r2va_direct_768p.mp4">r2va_direct_768p.mp4</a><br></td></tr>
   </tbody>
