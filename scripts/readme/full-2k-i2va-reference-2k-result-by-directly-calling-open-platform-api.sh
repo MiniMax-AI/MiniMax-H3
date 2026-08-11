@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 # Create an 8-second 2K FL2VA video directly and capture its runtime task ID.
 task_id=$(
@@ -29,14 +30,9 @@ task_id=$(
 }' |
     jq -er '.task_id'
 )
-# Query again while the task is queued or running.
-generation_result=$(
-  curl --silent --show-error \
-    --request GET \
-    --url "$MINIMAX_API_BASE/v2/query/video_generation/$task_id" \
-    --header "Authorization: Bearer $TOKEN"
-)
+# Poll until generation completes, fails, or times out.
+generation_result=$(pollMiniMaxTask "$MINIMAX_API_BASE" "$TOKEN" "$task_id")
 echo "$generation_result" | jq '{status: .task.status}'
 # Download the 2K MP4 after the task succeeds.
 video_url=$(echo "$generation_result" | jq -er '.task.content.url')
-curl --location "$video_url" --output i2va_direct_2k.mp4
+curlWithRetry --location "$video_url" --output i2va_direct_2k.mp4

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 # Create the H3-Base request with the expanded prompt and capture the video ID.
 video_id=$(
@@ -30,13 +31,10 @@ video_id=$(
       --data-binary @- |
     jq -er '.id'
 )
-# Query the generation status.
-curl --silent --show-error \
-  --request GET \
-  --url "$SGLANG_DEPLOYMENT_URL/v1/videos/$video_id" |
-  jq '{status}'
+# Poll until generation completes, fails, or times out.
+pollSglangVideo "$SGLANG_DEPLOYMENT_URL" "$video_id" >/dev/null
 # Download the local H3-Base MP4 after its status becomes completed.
-curl --silent --show-error \
+curlWithRetry --location \
   --request GET \
   --url "$SGLANG_DEPLOYMENT_URL/v1/videos/$video_id/content" \
   --output i2va.mp4
