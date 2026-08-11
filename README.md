@@ -259,7 +259,7 @@ sglang serve \
 
 #### Reproducible 768p cases
 
-The following three use cases T2VA, FL2VA, and Ref2VA demonstrate how to reproduce MiniMax\-H3 video\-audio generation\.
+The following three use cases (T2VA, FL2VA, and Ref2VA) demonstrate how to reproduce MiniMax\-H3 video\-audio generation\.
 
 | Use case | Request | Result |
 |---|---|---|
