@@ -85,7 +85,7 @@ Start gate is mandatory. If the user has already uploaded product material, only
 - In-frame advertising copy must be English.
 - If the user provides Chinese copy, translate it into concise English or ask for approval of the English version.
 - Visible in-frame copy must be 3-5 English words, preferably no more than 32 English characters including spaces. Do not write isolated 1-2 word feature labels.
-- Copy should feel like an Apple product film: sensory, benefit-led, material-led, or a light value proposition; avoid promotional slogans and ecommerce feature-tag wording.
+- Copy should feel like an Apple product film: sensory, benefit-led, material-led, or a light value proposition; avoid promotional slogans and e-commerce feature-tag wording.
 - Font reference: SF Pro Display / SF Pro Text. Prefer `SF Pro Display Semibold` in prompts.
 - Use no more than two text colors in a shot.
 - In white-tech style, the first half of the text must use black or dark gray; white text is forbidden on white backgrounds. In dark rim-light style, the first half may use white. The second half always uses the specific product color.
