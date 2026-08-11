@@ -11,16 +11,13 @@
 # tighter if you need an exact CUDA build (e.g. torch==2.4.1+cu121).
 torch>=2.4.0
 
-# diffusers is required for the H3 pipeline / modular pipeline. The official
-# docs reference the `minimax-h3` branch of diffusers for the latest class
-# additions; once that lands on PyPI, tighten the upper bound accordingly.
-# Until then, install from source: `pip install "git+https://github.com/huggingface/diffusers.git@minimax-h3"`
-diffusers>=0.32.2
+# MiniMax-H3 was merged after diffusers 0.39.0. Pin the merge
+# commit so installs contain the H3 modular pipeline and remain reproducible.
+diffusers @ git+https://github.com/huggingface/diffusers.git@f53d552036a0d1bd5570782a39cd40cfabf112bc
 
 # transformers provides the Qwen3-VL text encoder / processor / tokenizer used
-# by the H3 pipeline. Newer is generally better here; keep >=4.45 to get
-# Qwen3-VL support.
-transformers>=4.45.0
+# by the H3 pipeline. Qwen3-VL support starts in transformers 4.57.
+transformers>=4.57.0
 
 # safetensors is used to load the VAE / Transformer weights directly.
 safetensors>=0.4.3
@@ -35,6 +32,11 @@ huggingface_hub>=0.25.0
 
 # numpy is used throughout the audio / video VAE code.
 numpy>=1.24.0
+
+# Direct dependencies used by the released Visual and Audio VAE code.
+torchvision>=0.19.0
+einops>=0.8.0
+PyYAML>=6.0.1
 
 # Pillow is required by the Qwen3-VL processor for image decoding.
 Pillow>=10.0.0

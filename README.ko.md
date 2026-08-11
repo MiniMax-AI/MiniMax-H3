@@ -211,7 +211,7 @@ hf download MiniMaxAI/MiniMax-H3 --include "model_index.json" "FL2VA/*" "Ref2VA/
 hf download MiniMaxAI/MiniMax-H3 --include "model_index.json" "FL2VA/*" --local-dir MiniMax-H3
 ```
 
-diffusers 사용자는 수동 다운로드가 필요하지 않습니다. `ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-H3")`가 필요한 구성 요소만 가져옵니다. 로딩 방법은 [diffusers documentation](https://github.com/huggingface/diffusers/blob/minimax-h3/docs/source/en/api/pipelines/minimax_h3.md)을 참고하세요.
+diffusers 사용자는 수동 다운로드가 필요하지 않습니다. `ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-H3")`가 필요한 구성 요소만 가져옵니다. 로딩 방법은 [diffusers documentation](https://github.com/huggingface/diffusers/blob/f53d552036a0d1bd5570782a39cd40cfabf112bc/docs/source/en/api/pipelines/minimax_h3.md)을 참고하세요.
 
 모델 서빙에는 다음 추론 프레임워크를 권장합니다:
 
@@ -219,7 +219,7 @@ diffusers 사용자는 수동 다운로드가 필요하지 않습니다. `Modula
 
 - [vLLM](https://github.com/vllm-project/vllm) \- see [vllm recipes](https://recipes.vllm.ai/MiniMaxAI/MiniMax-H3)
 
-- [diffusers](https://github.com/huggingface/diffusers) \- see [diffusers docs](https://github.com/huggingface/diffusers/blob/minimax-h3/docs/source/en/api/pipelines/minimax_h3.md)
+- [diffusers](https://github.com/huggingface/diffusers) \- see [diffusers docs](https://github.com/huggingface/diffusers/blob/f53d552036a0d1bd5570782a39cd40cfabf112bc/docs/source/en/api/pipelines/minimax_h3.md)
 
 - [ComfyUI](https://github.com/Comfy-Org/ComfyUI) \- see  [Comfy tutorial](https://docs.comfy.org/tutorials/video/minimax/minimax-h3); use [R2V template](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json) / [T2V template](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_t2v.json)
 
