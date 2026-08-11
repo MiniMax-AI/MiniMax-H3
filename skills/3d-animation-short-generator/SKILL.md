@@ -103,7 +103,7 @@ Create a story outline and write it to a canvas text node named `故事大纲` o
 
 Include:
 
-- Protagonist Want / Need / flaw
+- Protagonist Want / Need / Flaw
 - Core world rule
 - 8-beat causal story spine
 - Emotional anchor and payoff
