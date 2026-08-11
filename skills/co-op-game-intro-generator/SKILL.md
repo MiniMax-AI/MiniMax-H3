@@ -46,7 +46,7 @@ Generate only one confirmation image from the filled `references/h3-confirmation
 ## STEP 5: Wait for approval
 Do not generate video until the user approves the image. If the user changes style, names, game title, identity, or image direction, return to the image prompt step.
 
-## STEP 6: Refill video prompt and generate with Minimax H3
+## STEP 6: Refill video prompt and generate with MiniMax H3
 After approval, load `references/h3-video-prompt-template.md` and refill the final video prompt with confirmed style, character refs, player names, game title, UI text, event timing, motion directions, and negative constraints. Generate the final video with Minimax H3.
 
 ## STEP 7: Repair common failures
