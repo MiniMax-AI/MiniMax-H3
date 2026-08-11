@@ -410,7 +410,7 @@ For each case below, we provide reference outputs at both 2K and 768p generated 
 }</code></pre></td></tr>
     <tr><td>H3-Base</td><td><a href="scripts/readme/full-2k-ref2va-h3-base.sh">View script</a></td><td><a href="assets/r2va.mp4">r2va.mp4</a><br></td></tr>
     <tr><td>Reference 2K result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-ref2va-reference-2k-result-by-directly-calling-open-platform-api.sh">View script</a></td><td><a href="assets/r2va_2k.mp4">r2va_2k.mp4</a></td></tr>
-    <tr><td>H3 API 2K in Open Platform for reference</td><td><a href="scripts/readme/full-2k-ref2va-h3-api-2k-in-open-platform-for-reference.sh">View script</a></td><td><a href="assets/r2va_direct_2k.mp4">r2va_direct_2k.mp4</a><br></td></tr>
+    <tr><td>Reference 2K result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-ref2va-h3-api-2k-in-open-platform-for-reference.sh">View script</a></td><td><a href="assets/r2va_direct_2k.mp4">r2va_direct_2k.mp4</a><br></td></tr>
     <tr><td>Reference 768P result by directly calling Open Platform API</td><td><a href="scripts/readme/full-2k-ref2va-reference-768p-result-by-directly-calling-open-platform-api.sh">View script</a></td><td><a href="assets/r2va_direct_768p.mp4">r2va_direct_768p.mp4</a><br></td></tr>
   </tbody>
 </table>
