@@ -43,6 +43,17 @@ class Snake1d(nn.Module):
 def init_weights(m):
     """Initialize Conv1d layers, including those wrapped with ``weight_norm``.
 
+    This is the canonical initializer for ``DacAudioVAE`` (encoder + decoder).
+    It uses ``trunc_normal_`` with ``std=0.02`` and explicitly zeroes biases,
+    matching the intended training configuration for this model family.
+
+    Note: ``dac_bigvgan.py`` / ``dac_utils.py`` also contain an ``init_weights``
+    helper (``std=0.01``, ``normal_``) used by BigVGAN's own module-level
+    ``apply()`` calls.  Because ``DacAudioVAE.__init__`` calls
+    ``self.apply(init_weights)`` *after* all sub-modules (including BigVGAN)
+    have been constructed, this function is the one that takes final effect on
+    every ``nn.Conv1d`` in the whole model graph.
+
     The encoder (``WNConv1d``) and decoder (BigVGAN) both wrap ``nn.Conv1d``
     with ``torch.nn.utils.parametrizations.weight_norm``. Under that
     parametrization ``m.weight`` is computed on access from
@@ -74,9 +85,15 @@ class ResidualUnit(nn.Module):
 
     def forward(self, x):
         y = self.block(x)
-        pad = (x.shape[-1] - y.shape[-1]) // 2
-        if pad > 0:
-            x = x[..., pad:-pad]
+        diff = x.shape[-1] - y.shape[-1]
+        if diff > 0:
+            # Crop the residual path to match the convolved output length.
+            # Use explicit left/right amounts to handle both even and odd
+            # differences safely (avoids the x[..., pad:-pad] pattern which
+            # silently drops an extra sample when diff is odd).
+            pad_left = diff // 2
+            pad_right = diff - pad_left  # == pad_left + (diff % 2)
+            x = x[..., pad_left : x.shape[-1] - pad_right]
         return x + y
 
 
@@ -93,7 +110,11 @@ class EncoderBlock(nn.Module):
                 dim,
                 kernel_size=2 * stride,
                 stride=stride,
-                padding=math.ceil(stride / 2),
+                # For kernel_size = 2*stride the correct "same-length" padding
+                # is (kernel_size - stride) // 2 = stride // 2.
+                # The previous math.ceil(stride / 2) was off by 1 for odd
+                # strides (e.g. stride=5 gave padding=3 instead of 2).
+                padding=stride // 2,
             ),
         )
 
@@ -209,7 +230,9 @@ class DacAudioVAE(nn.Module):
         if self.attn_proj:
             self.pre_block = AttnProjection(latent_dim, self.attn_proj_dim, num_heads=8)
 
-        self.sample_rate = sample_rate
+        # Apply canonical weight initialization to all Conv1d layers in the
+        # entire model graph (encoder + BigVGAN decoder). This single pass
+        # uses trunc_normal_(std=0.02) and is the intended final initializer.
         self.apply(init_weights)
 
     def preprocess(self, audio_data, sample_rate):

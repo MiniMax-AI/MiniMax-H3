@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 set -euo pipefail
 
 # Create a 5-second 2K Ref2VA video directly and capture its runtime task ID.

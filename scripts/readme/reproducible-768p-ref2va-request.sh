@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 set -euo pipefail
 
 # Submit the Ref2VA request with the complete H3-Context-IR prompt.

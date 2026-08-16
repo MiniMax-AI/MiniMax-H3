@@ -29,15 +29,19 @@ class CausalAttention(nn.Module):
     def __init__(self, in_dim, out_dim, num_heads):
         super().__init__()
         if in_dim > out_dim:
-            # assert in_dim // num_heads == out_dim
+            # Projection compresses in_dim → out_dim after attention.
+            # QKV operates in in_dim space so head_dim = in_dim // num_heads.
             self.head_dim = in_dim // num_heads
+            self.qkv_out_dim = in_dim
             self.qkv = nn.Linear(in_dim, in_dim * 3, bias=False)
             self.q_bias = nn.Parameter(torch.zeros(in_dim))
             self.v_bias = nn.Parameter(torch.zeros(in_dim))
             self.register_buffer("zero_k_bias", torch.zeros(in_dim))
         else:
-            # assert out_dim // num_heads == in_dim
+            # Projection expands (or keeps) in_dim → out_dim after attention.
+            # QKV operates in out_dim space so head_dim = out_dim // num_heads.
             self.head_dim = out_dim // num_heads
+            self.qkv_out_dim = out_dim
             self.qkv = nn.Linear(in_dim, out_dim * 3, bias=False)
             self.q_bias = nn.Parameter(torch.zeros(out_dim))
             self.v_bias = nn.Parameter(torch.zeros(out_dim))
@@ -47,21 +51,27 @@ class CausalAttention(nn.Module):
         self.out_dim = out_dim
         self.num_heads = num_heads
         self.scale = self.head_dim**-0.5
-        self.proj = nn.Linear(out_dim, out_dim)
+        # Final linear maps from the QKV output space to out_dim.
+        self.proj = nn.Linear(self.qkv_out_dim, out_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         B, N, C = x.shape
-        qkv = F.linear(input=x, weight=self.qkv.weight, bias=torch.cat((self.q_bias, self.zero_k_bias, self.v_bias)))
-        q, k, v = qkv.reshape(B, N, 3, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4).unbind(0)
+        qkv = F.linear(
+            input=x,
+            weight=self.qkv.weight,
+            bias=torch.cat((self.q_bias, self.zero_k_bias, self.v_bias)),
+        )
+        q, k, v = (
+            qkv.reshape(B, N, 3, self.num_heads, self.head_dim)
+            .permute(2, 0, 3, 1, 4)
+            .unbind(0)
+        )
 
         x = scaled_dot_product_attention(q, k, v, attn_mask=None, dropout_p=0.0, is_causal=True)
 
-        if self.in_dim > self.out_dim:
-            x = torch.mean(x, dim=1)
-            if self.in_dim // self.num_heads != self.out_dim:
-                x = nn.functional.adaptive_avg_pool1d(x, self.out_dim)
-        else:
-            x = x.transpose(1, 2).reshape(B, N, -1)
+        # Always reshape to [B, N, qkv_out_dim] so self.proj receives the
+        # correct input dimension regardless of whether in_dim > out_dim or not.
+        x = x.transpose(1, 2).reshape(B, N, self.qkv_out_dim)
         x = self.proj(x)
         return x
 
