@@ -1,0 +1,4 @@
+interface:
+  display_name: "X to H3 Video"
+  short_description: "Ground H3 video briefs in bounded public X sources"
+  default_prompt: "Use $x-to-h3-video to turn public X sources into a verified MiniMax H3 video brief."

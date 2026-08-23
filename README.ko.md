@@ -24,9 +24,9 @@
 
 # MiniMax H3
 
-## 프롬프트 작성 스킬
+## 에이전트 스킬
 
-이 저장소에 포함된 아홉 개 스킬 중 하나인 H3 프롬프트 작성 스킬을 설치합니다:
+이 저장소에는 열 개의 스킬이 포함되어 있습니다. H3 프롬프트 작성 스킬은 다음 명령으로 설치합니다:
 
 ```bash
 npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing
@@ -35,6 +35,14 @@ npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writin
 이 스킬은 `skills/h3-prompt-writing/references/` 아래에 두 개의 프롬프트 가이드를 제공합니다. `base-en.txt`는 텍스트/키프레임 모드용이고, `ref-en.txt`는 전체 참조(Ref2VA) 모드용입니다.
 
 **에이전트 호환성:** `h3-prompt-writing`은 외부 API 호출이 없는 순수 Markdown + 참조 파일 스킬이므로 Claude Code, Claude Agent SDK, Cursor, Windsurf, OpenAI 기반 에이전트/Codex, LangChain 등 `SKILL.md`와 로컬 파일을 읽을 수 있는 모든 환경에서 동작합니다. 함께 제공되는 `skills/h3-prompt-writing/agents/openai.yaml`은 [OpenAI의 스킬 사양](https://learn.chatgpt.com/docs/build-skills)에 따라 ChatGPT/Codex 스킬 UI를 위한 선택적 UI 메타데이터(표시 이름, 설명, 기본 프롬프트)만 추가할 뿐, 이 스킬을 OpenAI 에이전트로 제한하지 않습니다.
+
+출처를 추적할 수 있는 공개 X(Twitter) 게시물로 비디오 브리프를 만들려면 `x-to-h3-video`를 설치합니다:
+
+```bash
+npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill x-to-h3-video
+```
+
+이 스킬은 Xquik에서 공개 게시물을 최대 20개 가져오고, 출처 원장을 만들며, 사실 주장과 의견을 구분해 MiniMax H3 프롬프트를 준비합니다. 보조 스크립트는 환경에서 `XQUIK_API_KEY`를 읽고 X 쓰기 작업은 수행하지 않습니다.
 
 나머지 여덟 개는 MiniMax Hub의 캔버스 워크플로(`hub_generate_video`, `hub_generate_image`, 캔버스 노드, 선택 카드 등)를 위해 만들어진 스타일별 비디오 생성 스킬로, 범용 에이전트 환경으로 이식할 수 없습니다:
 

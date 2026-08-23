@@ -24,9 +24,9 @@
 
 # MiniMax H3
 
-## Prompt Writing Skill
+## Agent Skills
 
-Install the H3 prompt writing skill — one of nine skills bundled with this repository:
+This repository bundles ten skills. Install the H3 prompt writing skill with:
 
 ```bash
 npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing
@@ -35,6 +35,14 @@ npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writin
 It ships with two prompt guides under `skills/h3-prompt-writing/references/`: `base-en.txt` for text/keyframe modes and `ref-en.txt` for full-reference (Ref2VA) mode.
 
 **Agent compatibility:** `h3-prompt-writing` is a plain Markdown + reference-file skill with no external API calls, so it works in Claude Code, the Claude Agent SDK, Cursor, Windsurf, OpenAI-based agents/Codex, LangChain, or any other harness that can read a `SKILL.md` and local files. The bundled `skills/h3-prompt-writing/agents/openai.yaml` only adds optional UI metadata (display name, description, default prompt) for the ChatGPT/Codex skills UI, per [OpenAI's skill spec](https://learn.chatgpt.com/docs/build-skills) — it does not limit the skill to OpenAI agents.
+
+Install `x-to-h3-video` when a video brief needs attributable public X (Twitter) sources:
+
+```bash
+npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill x-to-h3-video
+```
+
+It retrieves at most 20 public posts through Xquik, emits a provenance ledger, separates claims from viewpoints, and prepares a MiniMax H3 prompt. Its helper reads `XQUIK_API_KEY` from the environment and never performs X writes.
 
 The remaining eight are style-specific video generation skills built for the MiniMax Hub's canvas workflow (`hub_generate_video`, `hub_generate_image`, canvas nodes, choice cards, etc.) and are not portable to generic agent harnesses:
 
