@@ -24,9 +24,9 @@
 
 # MiniMax H3
 
-## プロンプト作成スキル
+## エージェントスキル
 
-このリポジトリに同梱されている 9 つのスキルの 1 つである H3 プロンプト作成スキルをインストールします:
+このリポジトリには 10 個のスキルが同梱されています。H3 プロンプト作成スキルは次のコマンドでインストールできます:
 
 ```bash
 npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing
@@ -35,6 +35,14 @@ npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writin
 このスキルには `skills/h3-prompt-writing/references/` 配下に 2 つのプロンプトガイドが含まれています。`base-en.txt` はテキスト/キーフレームモード用、`ref-en.txt` はフルリファレンス（Ref2VA）モード用です。
 
 **エージェント互換性：** `h3-prompt-writing` は外部 API 呼び出しを行わない、純粋な Markdown + リファレンスファイルのスキルです。そのため、Claude Code、Claude Agent SDK、Cursor、Windsurf、OpenAI ベースのエージェント/Codex、LangChain など、`SKILL.md` とローカルファイルを読み取れるあらゆる環境で動作します。同梱されている `skills/h3-prompt-writing/agents/openai.yaml` は、[OpenAI のスキル仕様](https://learn.chatgpt.com/docs/build-skills) に基づき、ChatGPT/Codex のスキル UI 向けに任意の UI メタデータ（表示名、説明、デフォルトプロンプト）を追加するだけであり、このスキルを OpenAI エージェント専用に制限するものではありません。
+
+出典を追跡できる公開 X（Twitter）投稿から動画ブリーフを作成する場合は、`x-to-h3-video` をインストールします:
+
+```bash
+npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill x-to-h3-video
+```
+
+このスキルは Xquik から最大 20 件の公開投稿を取得し、出典台帳を作成して、事実の主張と意見を分けた MiniMax H3 プロンプトを準備します。補助スクリプトは環境変数から `XQUIK_API_KEY` を読み取り、X への書き込みは行いません。
 
 残りの 8 つは、MiniMax Hub のキャンバスワークフロー（`hub_generate_video`、`hub_generate_image`、キャンバスノード、選択カードなど）向けに構築されたスタイル別の動画生成スキルであり、汎用のエージェント実行環境には移植できません:
 

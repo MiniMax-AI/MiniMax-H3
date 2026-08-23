@@ -1,10 +1,10 @@
 # MiniMax H3 Skills
 
-This directory contains the skills bundled with [MiniMax H3](../README.md): **1 prompt writing skill** and **8 style-specific video generation skills**. Each skill lives in its own folder with an installable `SKILL.md` (plus a `SKILL.cn.md` Chinese version for the style skills) and any reference materials it needs.
+This directory contains the skills bundled with [MiniMax H3](../README.md): **2 portable prompt and research skills** and **8 style-specific video generation skills**. Each skill lives in its own folder with an installable `SKILL.md` (plus a `SKILL.cn.md` Chinese version for the style skills) and any reference materials it needs.
 
 ## Status
 
-The skills are actively maintained and still evolving. The 8 style skills ship with bilingual `SKILL.md`/`SKILL.cn.md`; `h3-prompt-writing` is currently English-only.
+The skills are actively maintained and still evolving. The 8 style skills ship with bilingual `SKILL.md`/`SKILL.cn.md`; `h3-prompt-writing` and `x-to-h3-video` are currently English-only.
 
 ## Installation
 
@@ -31,6 +31,16 @@ Write structured MiniMax H3 video generation prompts for all five generation mod
 
 - [`base-en.txt`](h3-prompt-writing/references/base-en.txt) — base text/keyframe modes
 - [`ref-en.txt`](h3-prompt-writing/references/ref-en.txt) — full-reference (Ref2VA) mode
+
+### x-to-h3-video
+
+[SKILL.md](x-to-h3-video/SKILL.md)
+
+Turn a bounded public X (Twitter) search into a source-grounded MiniMax H3 video brief. The Skill uses Xquik's published read API, emits a provenance ledger, keeps post content outside agent instructions, verifies material claims, and prepares an H3 shot plan and prompt. It never performs X writes and caps each source read at 20 posts.
+
+```bash
+npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill x-to-h3-video
+```
 
 ### minimalist-product-ad-generator
 

@@ -24,9 +24,9 @@
 
 # MiniMax H3
 
-## 提示词编写技能
+## 智能体技能
 
-安装 H3 提示词编写技能。这是本仓库内置的九个技能之一：
+本仓库内置十个技能。安装 H3 提示词编写技能：
 
 ```bash
 npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writing
@@ -35,6 +35,14 @@ npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill h3-prompt-writin
 该技能在 `skills/h3-prompt-writing/references/` 下提供两份提示词指南：`base-en.txt` 用于文本/关键帧模式，`ref-en.txt` 用于全参考（Ref2VA）模式。
 
 **智能体兼容性：** `h3-prompt-writing` 是一个纯 Markdown + 参考文件技能，不调用任何外部 API，因此可在 Claude Code、Claude Agent SDK、Cursor、Windsurf、基于 OpenAI 的智能体/Codex、LangChain，以及任何能够读取 `SKILL.md` 和本地文件的运行环境中使用。内置的 `skills/h3-prompt-writing/agents/openai.yaml` 仅按照 [OpenAI 的技能规范](https://learn.chatgpt.com/docs/build-skills) 提供可选的 ChatGPT/Codex 界面元数据（显示名称、描述、默认提示词），并不会将该技能限制为仅适用于 OpenAI 智能体。
+
+如果视频方案需要可追溯的公共 X（Twitter）来源，请安装 `x-to-h3-video`：
+
+```bash
+npx skills add https://github.com/MiniMax-AI/MiniMax-H3 --skill x-to-h3-video
+```
+
+该技能通过 Xquik 获取最多 20 条公共帖子，生成来源清单，区分事实主张与个人观点，并准备 MiniMax H3 提示词。辅助脚本从环境中读取 `XQUIK_API_KEY`，且绝不会执行 X 写入操作。
 
 其余八个是面向 MiniMax Hub 画布工作流（`hub_generate_video`、`hub_generate_image`、画布节点、选择卡片等）构建的特定风格视频生成技能，无法移植到通用智能体运行环境：
 
