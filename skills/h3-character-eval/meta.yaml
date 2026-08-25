@@ -1,0 +1,17 @@
+display-name-zh: 角色一致性评测
+version: 0.1.0
+tag-en: Evaluation
+tag-cn: 评测
+complete-tags-en:
+- Evaluation / Character Consistency
+- Evaluation / Quality Control
+complete-tags-cn:
+- 评测 / 角色一致性
+- 评测 / 质量控制
+summary-en: Measure whether generated videos preserved a character's declared traits, with a calibrated vision-judge audit.
+summary-cn: 用带校准控制的视觉模型审计，量化生成视频对角色既定特征的保持程度，输出 retention 词汇表评分。
+desc-en: For creators and developers who need character consistency as a number instead of a feeling. You provide character reference cards; the skill authors a binary, style-invariant trait contract from each card, prunes traits the card itself never rendered (positive control), renders a fixed scenario through reference-to-video, and audits sampled frames with a vision model under two further controls — two-pass stability with majority tie-breaks, and hard-negative specificity against confusable characters. Results map onto the Ref2VA retention vocabulary (fully_preserved / partially_preserved / weak_reference) as a promised-vs-delivered scorecard, with per-trait failures listed by cell and a sign test for arm comparisons. Validated on an 8-character, 3-style, 2-model grid (144 renders) where the controls caught unrendered promises, judge misses, and over-generic traits. Best for comparing styles, prompts, models, or skill versions on character retention; not a general video-quality or motion-quality benchmark.
+desc-cn: 面向需要把「角色一致性」从感觉变成数字的创作者与开发者。用户提供角色参考卡；本 Skill 会从卡片提炼可单帧核验、风格无关的二元特征契约，先用正向对照剔除卡片本身未呈现的特征，再以固定情景通过 reference-to-video 生成视频，并用视觉模型对采样帧逐特征审计，辅以两道校准控制：双轮稳定性（分歧走第三轮多数裁决）与易混角色硬负例特异性。结果映射到 Ref2VA retention 词汇表（fully_preserved / partially_preserved / weak_reference），输出「承诺 vs 交付」评分卡、逐格失败特征清单，以及用于组间比较的符号检验。已在 8 角色 × 3 风格 × 2 模型（144 次生成）网格上验证，三道控制分别捕获了未渲染的承诺、评审误判与过于泛化的特征。适用于比较风格、提示词、模型或 Skill 版本的角色保持能力；不适用于整体画质或运动质量评测。
+author-en: Billy Zhao
+author-cn: Billy Zhao
+source: community

@@ -1,6 +1,6 @@
 # MiniMax H3 Skills
 
-This directory contains the skills bundled with [MiniMax H3](../README.md): **1 prompt writing skill** and **8 style-specific video generation skills**. Each skill lives in its own folder with an installable `SKILL.md` (plus a `SKILL.cn.md` Chinese version for the style skills) and any reference materials it needs.
+This directory contains the skills bundled with [MiniMax H3](../README.md): **1 prompt writing skill**, **8 style-specific video generation skills**, and **1 evaluation skill**. Each skill lives in its own folder with an installable `SKILL.md` (plus a `SKILL.cn.md` Chinese version for the style skills) and any reference materials it needs.
 
 ## Status
 
@@ -31,6 +31,12 @@ Write structured MiniMax H3 video generation prompts for all five generation mod
 
 - [`base-en.txt`](h3-prompt-writing/references/base-en.txt) — base text/keyframe modes
 - [`ref-en.txt`](h3-prompt-writing/references/ref-en.txt) — full-reference (Ref2VA) mode
+
+### h3-character-eval
+
+Measure whether generated videos preserved a character's declared visual traits — the contract Ref2VA `retention_analysis` asserts but nothing measures. Builds a binary, style-invariant trait contract from character cards, renders a fixed scenario via reference-to-video, and audits sampled frames with a vision model under three calibration controls (card positive control, two-pass stability with majority tie-breaks, hard-negative specificity). Outputs a promised-vs-delivered scorecard in the retention-marker vocabulary, per-trait failures by cell, and a sign test for arm comparisons. English-only. The judge prompt and control arithmetic live under [`references/`](h3-character-eval/references/eval-protocol.md).
+
+[SKILL.md](h3-character-eval/SKILL.md)
 
 ### minimalist-product-ad-generator
 
