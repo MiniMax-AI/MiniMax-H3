@@ -62,6 +62,7 @@ class AutoencoderKL(ModelMixin, ConfigMixin, FromOriginalModelMixin):
     """
 
     _supports_gradient_checkpointing = True
+    temporal_chunk_callback_api_version = 1
     _compilable_modules = ["encoder", "decoder"]
     _deprecated_kwargs = [
         "clip_length",
@@ -528,14 +529,14 @@ class AutoencoderKL(ModelMixin, ConfigMixin, FromOriginalModelMixin):
             for k in range(pad_tokens)
         )
 
-    def _decode_temporal_output_frame_plan(self, z, z_head, z_tail, num_chunks, pad_tokens):
+    def _decode_temporal_output_chunk_plan(self, z, z_head, z_tail, num_chunks, pad_tokens):
         chunk_dec = self.tokens_chunk_size * self.vae_ratio_t
         split_count = int(self.token_drop > 0) + 1
-        total_frames = 0
+        logical_chunk_frames = []
         final_overlap_frames = 0
 
         if z_head is not None:
-            total_frames += 1
+            logical_chunk_frames.append(1)
 
         for i in range(num_chunks):
             t_start_idx = i * self.tokens_chunk_size
@@ -557,21 +558,58 @@ class AutoencoderKL(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                 f_end_idx = min(f_start_idx + chunk_dec, clip_frame_len)
                 chunk_frames = max(0, f_end_idx - f_start_idx - self.frame_pre_padding)
                 if j == 0:
-                    total_frames += chunk_frames
+                    if chunk_frames > 0:
+                        logical_chunk_frames.append(chunk_frames)
                 else:
                     final_overlap_frames = chunk_frames
 
-        total_frames += final_overlap_frames
+        if final_overlap_frames > 0:
+            logical_chunk_frames.append(final_overlap_frames)
         if z_tail is not None:
-            total_frames += 1
+            logical_chunk_frames.append(1)
 
+        total_frames = sum(logical_chunk_frames)
         pad_frames = self._decode_temporal_pad_frames(z, pad_tokens)
-        return int(total_frames), int(pad_frames), int(total_frames - pad_frames)
-
-    def _decode_temporal_streaming(self, z, z_head, z_tail, num_chunks, pad_tokens, temporal_cat_dtype):
-        total_frames, pad_frames, output_frames = self._decode_temporal_output_frame_plan(
-            z, z_head, z_tail, num_chunks, pad_tokens
+        output_frames = total_frames - pad_frames
+        remaining = output_frames
+        output_chunk_frames = []
+        for chunk_frames in logical_chunk_frames:
+            emitted_frames = min(chunk_frames, max(0, remaining))
+            if emitted_frames > 0:
+                output_chunk_frames.append(emitted_frames)
+                remaining -= emitted_frames
+        return (
+            int(total_frames),
+            int(pad_frames),
+            int(output_frames),
+            tuple(output_chunk_frames),
         )
+
+    def _decode_temporal_output_frame_plan(self, z, z_head, z_tail, num_chunks, pad_tokens):
+        return self._decode_temporal_output_chunk_plan(
+            z,
+            z_head,
+            z_tail,
+            num_chunks,
+            pad_tokens,
+        )[:3]
+
+    def _decode_temporal_streaming(
+        self,
+        z,
+        z_head,
+        z_tail,
+        num_chunks,
+        pad_tokens,
+        temporal_cat_dtype,
+        temporal_chunk_callback=None,
+    ):
+        total_frames, pad_frames, output_frames, callback_chunk_frames = (
+            self._decode_temporal_output_chunk_plan(
+                z, z_head, z_tail, num_chunks, pad_tokens
+            )
+        )
+        total_callback_chunks = len(callback_chunk_frames)
         if output_frames <= 0:
             raise ValueError(
                 f"decode_temporal streaming planned non-positive output_frames={output_frames} "
@@ -587,9 +625,32 @@ class AutoencoderKL(ModelMixin, ConfigMixin, FromOriginalModelMixin):
         logical_frames = 0
         dropped_frames = 0
         decoded_count = 0
+        callback_chunk_index = 0
+        callback_error = None
+        pending_final_callback = None
+
+        def publish_chunk(part, chunk_index, frame_start, is_final):
+            nonlocal callback_error
+            if temporal_chunk_callback is None or callback_error is not None:
+                return
+            try:
+                temporal_chunk_callback(
+                    part,
+                    chunk_index=chunk_index,
+                    total_chunks=total_callback_chunks,
+                    frame_start=frame_start,
+                    is_final=is_final,
+                )
+            except BaseException as exc:
+                # A callback may run on only one spatial-parallel rank. Defer
+                # its exception until every remaining decoder collective has
+                # completed so peer ranks cannot be stranded in a gather.
+                exc.__traceback__ = None
+                callback_error = exc
 
         def write_part(part):
             nonlocal dec, write_pos, logical_frames, dropped_frames
+            nonlocal callback_chunk_index, pending_final_callback
             part_frames = int(part.shape[2])
             if part_frames <= 0:
                 return
@@ -602,10 +663,30 @@ class AutoencoderKL(ModelMixin, ConfigMixin, FromOriginalModelMixin):
             remaining = int(dec.shape[2]) - write_pos
             copy_frames = min(part_frames, max(0, remaining))
             if copy_frames > 0:
-                dec[:, :, write_pos : write_pos + copy_frames, :, :].copy_(
+                frame_start = write_pos
+                frame_stop = frame_start + copy_frames
+                dec[:, :, frame_start:frame_stop, :, :].copy_(
                     part[:, :, :copy_frames, :, :]
                 )
-                write_pos += copy_frames
+                # Copy into the returned accumulator before invoking the
+                # callback so accidental mutation of the borrowed source view
+                # cannot change the full decode result.
+                callback_part = part[:, :, :copy_frames, :, :]
+                if frame_stop == output_frames:
+                    pending_final_callback = (
+                        callback_part,
+                        callback_chunk_index,
+                        frame_start,
+                    )
+                else:
+                    publish_chunk(
+                        callback_part,
+                        callback_chunk_index,
+                        frame_start,
+                        False,
+                    )
+                callback_chunk_index += 1
+                write_pos = frame_stop
             dropped_frames += part_frames - copy_frames
 
         for i in range(num_chunks):
@@ -673,9 +754,38 @@ class AutoencoderKL(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                 f"write_pos={write_pos} output_frames={output_frames}"
             )
 
+        if temporal_chunk_callback is not None:
+            if pending_final_callback is None:
+                raise RuntimeError(
+                    "decode_temporal streaming produced no terminal callback chunk"
+                )
+            if callback_chunk_index != total_callback_chunks:
+                raise RuntimeError(
+                    "decode_temporal streaming callback plan mismatch: "
+                    f"chunks={callback_chunk_index}/{total_callback_chunks}"
+                )
+            final_part, final_index, final_start = pending_final_callback
+            publish_chunk(final_part, final_index, final_start, True)
+            if callback_error is not None:
+                raise callback_error.with_traceback(None)
+
         return dec
 
-    def decode_temporal(self, z):
+    def decode_temporal(self, z, *, temporal_chunk_callback=None):
+        """Decode video tokens and optionally publish committed temporal chunks.
+
+        The callback receives an ordered, nonempty, read-only borrowed
+        ``BCTHW`` tensor in the decoder value domain after temporal overlap
+        blending and final padding removal, plus keyword-only ``chunk_index``,
+        ``total_chunks``, ``frame_start``, and ``is_final`` metadata.
+        Concatenating the chunks reproduces the full return. Dtype and device
+        match the decoder output; contiguity is not guaranteed. The callback
+        runs synchronously on the decoder stream and has no rank policy. Clone
+        the tensor or establish stream ownership before retaining it after the
+        callback returns.
+        """
+        if temporal_chunk_callback is not None and self.training:
+            raise ValueError("temporal_chunk_callback is inference-only")
         chunk_dec = self.tokens_chunk_size * self.vae_ratio_t
 
         isolated_token_num = 0
@@ -713,9 +823,17 @@ class AutoencoderKL(ModelMixin, ConfigMixin, FromOriginalModelMixin):
             z = torch.cat([z, pad_z], dim=2)
 
         temporal_cat_dtype = _resolve_temporal_cat_dtype()
-        if not self.training and _resolve_temporal_stream_cat():
+        if not self.training and (
+            _resolve_temporal_stream_cat() or temporal_chunk_callback is not None
+        ):
             return self._decode_temporal_streaming(
-                z, z_head, z_tail, num_chunks, pad_tokens, temporal_cat_dtype
+                z,
+                z_head,
+                z_tail,
+                num_chunks,
+                pad_tokens,
+                temporal_cat_dtype,
+                temporal_chunk_callback=temporal_chunk_callback,
             )
 
         decoded_tasks = []
@@ -787,14 +905,30 @@ class AutoencoderKL(ModelMixin, ConfigMixin, FromOriginalModelMixin):
 
         return dec
 
-    def decode_base(self, z, frame_num=None, process_image=False):
+    def decode_base(
+        self,
+        z,
+        frame_num=None,
+        process_image=False,
+        *,
+        temporal_chunk_callback=None,
+    ):
+        if temporal_chunk_callback is not None and (
+            process_image or not self.use_3d_conv or frame_num is not None
+        ):
+            raise ValueError(
+                "temporal_chunk_callback requires an untrimmed 3D video decode"
+            )
         if process_image or not self.use_3d_conv:
             if not self.use_3d_conv and z.ndim == 5:
                 z = z.squeeze(2)
 
             recon = self._adaptive_decode(z)
         else:
-            recon = self.decode_temporal(z)
+            recon = self.decode_temporal(
+                z,
+                temporal_chunk_callback=temporal_chunk_callback,
+            )
 
         if self.use_3d_conv:
             if frame_num is not None:
@@ -1251,8 +1385,3 @@ class AutoencoderKLLegacy(AutoencoderKL):
     def setup_training(self, **kwargs):
         self.fix_modules = kwargs.get("fix_modules", [])
         self.frozen_modules = kwargs.get("frozen_modules", [])
-
-
-
-
-
