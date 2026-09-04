@@ -181,6 +181,9 @@ H3 は、それぞれのモダリティを表現するために、視覚 latent 
 
 ### H3\-Base のローカルデプロイ
 
+> [!NOTE]
+> 32 GB のユニファイドメモリを搭載した Mac では、公開 checkpoint が使用可能なメモリ容量を超えるため、H3\-Base のローカル推論は実行できません。代わりに MiniMax API、または十分な GPU メモリを備えた CUDA サーバーを使用してください。
+
 MiniMax H3 は 2 つのタスク別 checkpoint として公開されています。各 checkpoint には、専用の Omni Transformer Model と、必要な processor、tokenizer、text encoder、Visual VAE、スタンドアロン Audio VAE コンポーネントが含まれます。
 
 |Checkpoint|Supported Tasks|Input Conditions|Output|Precision|

@@ -181,6 +181,9 @@ In addition, the “Prompting Guidance” section provides a detailed tutorial t
 
 ### Local Deployment of H3\-Base
 
+> [!NOTE]
+> Local H3\-Base inference is not feasible on a Mac with 32 GB of unified memory because the released checkpoints exceed the available memory. Use the MiniMax API or a CUDA GPU server with sufficient memory instead.
+
 MiniMax H3 is released as two task\-specific checkpoints\. Each checkpoint contains a specialized Omni Transformer Model together with the required processor, tokenizer, text encoder, Visual VAE, and standalone Audio VAE components\.
 
 |Checkpoint|Supported Tasks|Input Conditions|Output|Precision|
