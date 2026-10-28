@@ -72,7 +72,7 @@ H3 supports the following input and output specifications:
 |---|---|
 | Output duration | 4–15 seconds |
 | Output aspect ratio | Supports a wide range of aspect ratios, including but not limited to 21:9, 16:9, 4:3, 1:1, 3:4, and 9:16 |
-| Output resolution | Supports various resolution dimensions. The shorter side is set to 768 pixels by default. 2K \| generation can be achieved with H3-Regenerate-2K |
+| Output resolution | Supports various resolution dimensions. The shorter side is set to 768 pixels by default. 2K generation can be achieved with H3-Regenerate-2K |
 | Output frame rate | 24 FPS |
 | Output audio | 32 kHz stereo |
 | Supported dialogue languages | Stable support for 11 languages: Arabic, Chinese, English, French, German, Italian, Japanese, Korean, Portuguese, Russian, and Spanish. Additional languages are also supported to varying degrees |
