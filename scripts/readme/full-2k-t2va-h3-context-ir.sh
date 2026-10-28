@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 # Create the prompt-expansion task and capture its runtime ID.
 task_id=$(
@@ -21,13 +22,8 @@ task_id=$(
 }' |
     jq -er '.task_id'
 )
-# Query again while the task is queued or running.
-context_ir_result=$(
-  curl --silent --show-error \
-    --request GET \
-    --url "$MINIMAX_API_BASE/v2/query/video_generation/$task_id" \
-    --header "Authorization: Bearer $TOKEN"
-)
+# Poll until prompt expansion completes, fails, or times out.
+context_ir_result=$(pollMiniMaxTask "$MINIMAX_API_BASE" "$TOKEN" "$task_id")
 echo "$context_ir_result" | jq .
 # Export the complete expanded prompt for H3-Base and regeneration.
 EXPANDED_PROMPT=$(echo "$context_ir_result" | jq -er '.task.content.prompt')

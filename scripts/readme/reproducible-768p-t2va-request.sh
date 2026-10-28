@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 # Submit the T2VA request with the complete H3-Context-IR prompt.
 response=$(
@@ -23,13 +24,10 @@ response=$(
 JSON
 )
 video_id=$(printf '%s\n' "$response" | jq -er '.id')
-# Query the generation status.
-curl --fail-with-body --silent --show-error \
-  --request GET \
-  --url "http://localhost:30010/v1/videos/$video_id" |
-  jq '{status}'
+# Poll until generation completes, fails, or times out.
+pollSglangVideo "http://localhost:30010" "$video_id" >/dev/null
 # Download the generated video after its status becomes completed.
-curl --fail-with-body --silent --show-error \
+curlWithRetry --location \
   --request GET \
   --url "http://localhost:30010/v1/videos/$video_id/content" \
   --output t2va.mp4

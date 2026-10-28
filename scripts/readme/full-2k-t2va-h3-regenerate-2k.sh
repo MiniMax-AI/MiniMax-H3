@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 H3_BASE_VIDEO='./t2va.mp4'
 # Encode the local H3-Base video as a Data URL and create the regeneration task.
@@ -35,14 +36,9 @@ task_id=$(
       --data-binary @- |
     jq -er '.task_id'
 )
-# Query again while the task is queued or running.
-regeneration_result=$(
-  curl --silent --show-error \
-    --request GET \
-    --url "$MINIMAX_API_BASE/v2/query/video_generation/$task_id" \
-    --header "Authorization: Bearer $TOKEN"
-)
+# Poll until regeneration completes, fails, or times out.
+regeneration_result=$(pollMiniMaxTask "$MINIMAX_API_BASE" "$TOKEN" "$task_id")
 echo "$regeneration_result" | jq '{status: .task.status}'
 # Download the 2K MP4 after the task succeeds.
 video_url=$(echo "$regeneration_result" | jq -er '.task.content.url')
-curl --location "$video_url" --output t2va_2k.mp4
+curlWithRetry --location "$video_url" --output t2va_2k.mp4
