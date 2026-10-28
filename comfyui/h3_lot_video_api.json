@@ -1,0 +1,290 @@
+{
+ "1": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+   "weight_dtype": "default"
+  },
+  "_meta": {
+   "title": "H3 FL2VA DiT (int8 ConvRot; the LoT adapters were trained on it)"
+  }
+ },
+ "2": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+   "type": "minimax",
+   "device": "default"
+  }
+ },
+ "3": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+  },
+  "_meta": {
+   "title": "Video VAE"
+  }
+ },
+ "4": {
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "lora_name": "minimax_h3_lot_run4_nikki_lora.safetensors",
+   "strength_model": 1.0
+  },
+  "_meta": {
+   "title": "LoT LoRA (HF johndpope/MiniMax-H3-LoT run4_nikki_distill/lora.safetensors)"
+  }
+ },
+ "5": {
+  "class_type": "MiniMaxH3LoTApply",
+  "inputs": {
+   "model": [
+    "4",
+    0
+   ],
+   "adapter": "run4_nikki_distill_adapter.safetensors",
+   "layout": "center"
+  },
+  "_meta": {
+   "title": "LoT Apply (adapter -> models/lot)"
+  }
+ },
+ "6": {
+  "class_type": "MiniMaxH3SigmaShift",
+  "inputs": {
+   "model": [
+    "5",
+    0
+   ],
+   "shift_video": 12.0,
+   "shift_audio": 3.0
+  }
+ },
+ "7": {
+  "class_type": "MiniMaxH3ImageToVideo",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ],
+   "prompt": "Head-and-shoulders portrait of the woman in a plain grey studio, soft even light. She looks into the camera and says quickly: \"Wait, what time is it? Did I miss the train?\" Her lips, jaw, eyes and head move naturally with the words. Static locked-off camera, single continuous shot, no cut. Sharp focus, crisp detailed face and eyes, no motion blur, no soft focus.",
+   "width": 512,
+   "height": 768,
+   "length": 22
+  },
+  "_meta": {
+   "title": "t2va, 22 frames (add first_frame for i2va)"
+  }
+ },
+ "8": {
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 7
+  }
+ },
+ "9": {
+  "class_type": "BasicGuider",
+  "inputs": {
+   "model": [
+    "6",
+    0
+   ],
+   "conditioning": [
+    "7",
+    0
+   ]
+  }
+ },
+ "10": {
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "res_multistep"
+  }
+ },
+ "11": {
+  "class_type": "BasicScheduler",
+  "inputs": {
+   "model": [
+    "6",
+    0
+   ],
+   "scheduler": "simple",
+   "steps": 20,
+   "denoise": 1.0
+  }
+ },
+ "12": {
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "noise": [
+    "8",
+    0
+   ],
+   "guider": [
+    "9",
+    0
+   ],
+   "sampler": [
+    "10",
+    0
+   ],
+   "sigmas": [
+    "11",
+    0
+   ],
+   "latent_image": [
+    "7",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "Sample (LoT)"
+  }
+ },
+ "13": {
+  "class_type": "MiniMaxH3LoTUnscaleLatent",
+  "inputs": {
+   "samples": [
+    "12",
+    0
+   ],
+   "lot": [
+    "5",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "LoT Unscale Latent (required before decode)"
+  }
+ },
+ "14": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "13",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ]
+  }
+ },
+ "15": {
+  "class_type": "SaveAnimatedWEBP",
+  "inputs": {
+   "images": [
+    "14",
+    0
+   ],
+   "filename_prefix": "h3_lot/lot_video_center",
+   "fps": 24.0,
+   "lossless": false,
+   "quality": 90,
+   "method": "default"
+  }
+ },
+ "16": {
+  "class_type": "MiniMaxH3SigmaShift",
+  "inputs": {
+   "model": [
+    "4",
+    0
+   ],
+   "shift_video": 12.0,
+   "shift_audio": 3.0
+  },
+  "_meta": {
+   "title": "Dense branch (same LoRA, no LoT) for A/B"
+  }
+ },
+ "17": {
+  "class_type": "BasicGuider",
+  "inputs": {
+   "model": [
+    "16",
+    0
+   ],
+   "conditioning": [
+    "7",
+    0
+   ]
+  }
+ },
+ "18": {
+  "class_type": "BasicScheduler",
+  "inputs": {
+   "model": [
+    "16",
+    0
+   ],
+   "scheduler": "simple",
+   "steps": 20,
+   "denoise": 1.0
+  }
+ },
+ "19": {
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "noise": [
+    "8",
+    0
+   ],
+   "guider": [
+    "17",
+    0
+   ],
+   "sampler": [
+    "10",
+    0
+   ],
+   "sigmas": [
+    "18",
+    0
+   ],
+   "latent_image": [
+    "7",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "Sample (dense)"
+  }
+ },
+ "20": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "19",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ]
+  }
+ },
+ "21": {
+  "class_type": "SaveAnimatedWEBP",
+  "inputs": {
+   "images": [
+    "20",
+    0
+   ],
+   "filename_prefix": "h3_lot/dense_video",
+   "fps": 24.0,
+   "lossless": false,
+   "quality": 90,
+   "method": "default"
+  }
+ }
+}

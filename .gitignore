@@ -1,1 +1,5 @@
 *.safetensors
+
+# Level-of-Token training/render output (checkpoints, logs, renders)
+scripts/lot/runs/
+scripts/lot/__pycache__/
