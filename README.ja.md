@@ -215,7 +215,7 @@ hf download MiniMaxAI/MiniMax-H3 --include "model_index.json" "FL2VA/*" "Ref2VA/
 hf download MiniMaxAI/MiniMax-H3 --include "model_index.json" "FL2VA/*" --local-dir MiniMax-H3
 ```
 
-diffusers ユーザーは手動でダウンロードする必要はありません。`ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-H3")` が必要なコンポーネントだけを取得します。読み込み方法は [diffusers documentation](https://github.com/huggingface/diffusers/blob/minimax-h3/docs/source/en/api/pipelines/minimax_h3.md) を参照してください。
+diffusers ユーザーは手動でダウンロードする必要はありません。`ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-H3")` が必要なコンポーネントだけを取得します。読み込み方法は [diffusers documentation](https://github.com/huggingface/diffusers/blob/f53d552036a0d1bd5570782a39cd40cfabf112bc/docs/source/en/api/pipelines/minimax_h3.md) を参照してください。
 
 モデルのサービングには以下の推論フレームワークを推奨します:
 
@@ -223,7 +223,7 @@ diffusers ユーザーは手動でダウンロードする必要はありませ�
 
 - [vLLM](https://github.com/vllm-project/vllm) \- see [vllm recipes](https://recipes.vllm.ai/MiniMaxAI/MiniMax-H3)
 
-- [diffusers](https://github.com/huggingface/diffusers) \- see [diffusers docs](https://github.com/huggingface/diffusers/blob/minimax-h3/docs/source/en/api/pipelines/minimax_h3.md)
+- [diffusers](https://github.com/huggingface/diffusers) \- see [diffusers docs](https://github.com/huggingface/diffusers/blob/f53d552036a0d1bd5570782a39cd40cfabf112bc/docs/source/en/api/pipelines/minimax_h3.md)
 
 - [ComfyUI](https://github.com/Comfy-Org/ComfyUI) \- see  [Comfy tutorial](https://docs.comfy.org/tutorials/video/minimax/minimax-h3); use [R2V template](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json) / [T2V template](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_t2v.json)
 
