@@ -209,10 +209,10 @@ MiniMax H3 は 2 つのタスク別 checkpoint として公開されています
 
 ```bash
 # Original checkpoint, both task families (SGLang, vLLM):
-hf download MiniMaxAI/MiniMax-H3 --include "model_index.json" "FL2VA/*" "Ref2VA/*" --local-dir MiniMax-H3
+hf download MiniMaxAI/MiniMax-H3 model_index.json "FL2VA/*" "Ref2VA/*" --local-dir MiniMax-H3
 
 # Or a single task family:
-hf download MiniMaxAI/MiniMax-H3 --include "model_index.json" "FL2VA/*" --local-dir MiniMax-H3
+hf download MiniMaxAI/MiniMax-H3 model_index.json "FL2VA/*" --local-dir MiniMax-H3
 ```
 
 diffusers ユーザーは手動でダウンロードする必要はありません。`ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-H3")` が必要なコンポーネントだけを取得します。読み込み方法は [diffusers documentation](https://github.com/huggingface/diffusers/blob/f53d552036a0d1bd5570782a39cd40cfabf112bc/docs/source/en/api/pipelines/minimax_h3.md) を参照してください。
