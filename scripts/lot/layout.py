@@ -113,16 +113,31 @@ def layout_from_rects(time: int, height: int, width: int, rects: list[TokenRect]
     return LotLayout(time, height, width, tuple(rects))
 
 
-def _walk_squares(time: int, height: int, width: int, root: int, keep) -> LotLayout:
+def _walk_squares(time: int, height: int, width: int, root: int, keep, edge_rects: bool = False) -> LotLayout:
+    """Quadtree over any ``height x width`` grid; ``keep(t, u, v, eh, ew)`` decides a merge.
+
+    Blocks are laid on the ``root`` lattice from the top-left. A block that
+    crosses the far edge is clipped: it splits until its pieces fit (squares
+    only), or, with ``edge_rects``, is kept as the clipped rectangle when both
+    sides are powers of two (e.g. 4x2 on the 2-token strip of H3's 24x42).
+    """
     if root < 1 or (root & (root - 1)) != 0:
         raise ValueError(f"root extent must be a power of two, got {root}")
-    if height % root != 0 or width % root != 0:
-        raise ValueError(f"token grid {(height, width)} is not divisible by root {root}")
     rects: list[TokenRect] = []
 
     def visit(t: int, u: int, v: int, size: int) -> None:
-        if size == 1 or keep(t, u, v, size):
-            rects.append(TokenRect(t, u, v, 1, size, size))
+        if u >= height or v >= width:
+            return
+        eh, ew = min(size, height - u), min(size, width - v)
+        if size == 1:
+            rects.append(TokenRect(t, u, v, 1, 1, 1))
+            return
+        if eh == size and ew == size:
+            if keep(t, u, v, size, size):
+                rects.append(TokenRect(t, u, v, 1, size, size))
+                return
+        elif edge_rects and max(eh, ew) > 1 and _power_of_two(eh) and _power_of_two(ew) and keep(t, u, v, eh, ew):
+            rects.append(TokenRect(t, u, v, 1, eh, ew))
             return
         half = size // 2
         for du in (0, half):
@@ -134,6 +149,10 @@ def _walk_squares(time: int, height: int, width: int, root: int, keep) -> LotLay
             for v in range(0, width, root):
                 visit(t, u, v, root)
     return LotLayout(time, height, width, tuple(rects))
+
+
+def _power_of_two(n: int) -> bool:
+    return n >= 1 and (n & (n - 1)) == 0
 
 
 def _as_time_field(field: torch.Tensor) -> torch.Tensor:
@@ -148,6 +167,7 @@ def layout_from_detail(
     detail: torch.Tensor,
     thresholds: dict[int, float],
     root: int = 8,
+    edge_rects: bool = False,
 ) -> LotLayout:
     """Quadtree of eq. 23.
 
@@ -164,14 +184,14 @@ def layout_from_detail(
     if ordered != sorted(ordered):
         raise ValueError("thresholds must satisfy t8 <= t4 <= t2")
 
-    def keep(t: int, u: int, v: int, size: int) -> bool:
-        block = field[t, u:u + size, v:v + size]
-        return float(block.max()) < float(thresholds[size])
+    def keep(t: int, u: int, v: int, eh: int, ew: int) -> bool:
+        block = field[t, u:u + eh, v:v + ew]
+        return float(block.max()) < float(thresholds[max(eh, ew)])
 
-    return _walk_squares(field.shape[0], field.shape[1], field.shape[2], root, keep)
+    return _walk_squares(field.shape[0], field.shape[1], field.shape[2], root, keep, edge_rects)
 
 
-def layout_from_desired(desired: torch.Tensor, root: int = 8) -> LotLayout:
+def layout_from_desired(desired: torch.Tensor, root: int = 8, edge_rects: bool = False) -> LotLayout:
     """Keep a square only when every cell inside allows that extent.
 
     ``desired`` stores the coarsest square extent each finest cell may belong
@@ -180,11 +200,11 @@ def layout_from_desired(desired: torch.Tensor, root: int = 8) -> LotLayout:
     """
     field = _as_time_field(desired).detach().float()
 
-    def keep(t: int, u: int, v: int, size: int) -> bool:
-        block = field[t, u:u + size, v:v + size]
-        return float(block.min()) >= float(size)
+    def keep(t: int, u: int, v: int, eh: int, ew: int) -> bool:
+        block = field[t, u:u + eh, v:v + ew]
+        return float(block.min()) >= float(max(eh, ew))
 
-    return _walk_squares(field.shape[0], field.shape[1], field.shape[2], root, keep)
+    return _walk_squares(field.shape[0], field.shape[1], field.shape[2], root, keep, edge_rects)
 
 
 def levels_to_desired(level: torch.Tensor, max_level: int = 3) -> torch.Tensor:
@@ -201,6 +221,7 @@ def layout_from_regions(
     regions: list[tuple[torch.Tensor, int]],
     root: int = 8,
     time: int = 1,
+    edge_rects: bool = False,
 ) -> LotLayout:
     """Eq. 19. Overlapping regions keep the finer (larger) level.
 
@@ -219,7 +240,7 @@ def layout_from_regions(
             raise ValueError(f"mask shape {tuple(mask_field.shape)} != {(time, height, width)}")
         picked = torch.full_like(level, int(region_level))
         level = torch.where(mask_field, torch.maximum(level, picked), level)
-    return layout_from_desired(levels_to_desired(level), root=root)
+    return layout_from_desired(levels_to_desired(level), root=root, edge_rects=edge_rects)
 
 
 def shape_features(extent: tuple[int, int, int], include_time: bool = False) -> torch.Tensor:
@@ -296,7 +317,8 @@ def blur_radius(depth: torch.Tensor, focal_depth: float, r_target: float) -> tor
     return deviation * (float(r_target) / percentile)
 
 
-def layout_from_blur(radius: torch.Tensor, support: dict[int, float], root: int = 8) -> LotLayout:
+def layout_from_blur(radius: torch.Tensor, support: dict[int, float], root: int = 8,
+                     edge_rects: bool = False) -> LotLayout:
     """Merge a block only when its smallest blur radius supports that extent.
 
     ``support[b]`` is the minimum radius that still permits an extent-``b``
@@ -312,11 +334,11 @@ def layout_from_blur(radius: torch.Tensor, support: dict[int, float], root: int 
         raise ValueError("blur support must be larger for coarser extents")
     field = _as_time_field(radius).detach().float()
 
-    def keep(t: int, u: int, v: int, size: int) -> bool:
-        block = field[t, u:u + size, v:v + size]
-        return float(block.min()) >= float(support[size])
+    def keep(t: int, u: int, v: int, eh: int, ew: int) -> bool:
+        block = field[t, u:u + eh, v:v + ew]
+        return float(block.min()) >= float(support[max(eh, ew)])
 
-    return _walk_squares(field.shape[0], field.shape[1], field.shape[2], root, keep)
+    return _walk_squares(field.shape[0], field.shape[1], field.shape[2], root, keep, edge_rects)
 
 
 def directional_variation(luminance: torch.Tensor) -> torch.Tensor:
@@ -340,6 +362,7 @@ def layout_from_vrs(
     sensitivity: float,
     ambient: float,
     root: int = 8,
+    edge_rects: bool = False,
 ) -> LotLayout:
     """Coarsen a block when its variation stays under ``s * (mean(I) + a)``.
 
@@ -353,10 +376,10 @@ def layout_from_vrs(
     luma = _as_time_field(luminance).float()
     error = _as_time_field(directional_variation(luminance)).float()
 
-    def keep(t: int, u: int, v: int, size: int) -> bool:
-        block_luma = luma[t, u:u + size, v:v + size]
-        block_error = error[t, u:u + size, v:v + size]
+    def keep(t: int, u: int, v: int, eh: int, ew: int) -> bool:
+        block_luma = luma[t, u:u + eh, v:v + ew]
+        block_error = error[t, u:u + eh, v:v + ew]
         tau = float(sensitivity) * (float(block_luma.mean()) + float(ambient))
         return float(block_error.max()) < tau
 
-    return _walk_squares(luma.shape[0], luma.shape[1], luma.shape[2], root, keep)
+    return _walk_squares(luma.shape[0], luma.shape[1], luma.shape[2], root, keep, edge_rects)

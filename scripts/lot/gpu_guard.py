@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import subprocess
 
-GPU_SCRIPTS = ("train_synth.py", "parity_h3.py", "procrustes_h3.py", "make_pairs_h3.py", "render_h3.py", "time_decode_h3.py", "train_h3.py", "build_cache_h3.py", "time_lot_h3.py")
+GPU_SCRIPTS = ("train_synth.py", "parity_h3.py", "procrustes_h3.py", "make_pairs_h3.py", "render_h3.py", "time_decode_h3.py", "train_h3.py", "build_cache_h3.py", "time_lot_h3.py", "mixed_res_h3.py")
 
 
 def other_gpu_job() -> str | None:

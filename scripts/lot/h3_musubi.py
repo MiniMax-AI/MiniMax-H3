@@ -11,6 +11,11 @@ with three changes on the target video only:
 2. their rotary positions are the rectangle centres,
 3. the final norm + AdaLN feed the splice's heads instead of ``video_out``.
 
+Optional, from MPEG-Diffusion (``mixed_res``): ``dual=DualKV(...)`` gives 1x1 queries a dense
+key/value view with coarse keys expanded to their cells; ``capture={"block": i}`` returns that
+block's video states (for the region head) and, with ``"kv": {}``, each block's pre-RoPE video
+keys/values (for fitting the up-maps).
+
 Text, audio, and the block stack are untouched. The output is H3's dense
 ``x0 - eps`` velocity in every case, so the samplers step it unchanged.
 
@@ -22,6 +27,7 @@ rows are on the video shift (12). They carry no loss.
 
 from __future__ import annotations
 
+import contextlib
 import sys
 from dataclasses import replace
 
@@ -159,7 +165,7 @@ def _silence(latent_t: int, sigma_a: float, device, generator=None) -> torch.Ten
 
 
 def predict(dit, latent: torch.Tensor, t, text: torch.Tensor, *, lot=None,
-            audio_generator: torch.Generator | None = None) -> torch.Tensor:
+            audio_generator: torch.Generator | None = None, dual=None, capture: dict | None = None) -> torch.Tensor:
     """H3's velocity (``x0 - eps``) for ``latent`` ``(1, 24, T, H, W)`` at cleanness ``t``.
 
     ``text`` is ``(1, L, 5120)`` (or ``(L, 5120)``) Qwen3-VL layer-50 states.
@@ -179,12 +185,15 @@ def predict(dit, latent: torch.Tensor, t, text: torch.Tensor, *, lot=None,
     audio = _silence(latent_t, sigma_a, device, audio_generator)
     tags = torch.ones(1, text.shape[1], dtype=torch.int64)
     if lot is None:
+        if dual is not None or capture is not None:
+            raise ValueError("dual and capture need a LoT splice (use a dense layout for the dense model)")
         return dit(video_latents=latent, audio_latents=audio, text_hidden_states=text, text_token_tags=tags,
                    layout=layout, model_t_video=t_video, model_t_audio=1.0 - sigma_a).video
-    return _lot_forward(dit, lot, layout, latent, audio, text, tags, t_video, 1.0 - sigma_a)
+    return _lot_forward(dit, lot, layout, latent, audio, text, tags, t_video, 1.0 - sigma_a, dual=dual, capture=capture)
 
 
-def _lot_forward(dit, lot, layout, latent, audio, text, tags, t_video: float, t_audio: float) -> torch.Tensor:
+def _lot_forward(dit, lot, layout, latent, audio, text, tags, t_video: float, t_audio: float, *,
+                 dual=None, capture: dict | None = None) -> torch.Tensor:
     """``MiniMaxH3Model.forward`` for a T2VA layout, with the target video on ``lot.layout``."""
     from musubi_tuner.minimax_h3.packing import (
         H3RowSegment,
@@ -217,24 +226,38 @@ def _lot_forward(dit, lot, layout, latent, audio, text, tags, t_video: float, t_
     hidden = torch.cat([text_rows, audio_rows, video], dim=1)
 
     # 2. Rotary positions: the dense grid with the video tail replaced by rectangle centres.
-    positions = lot.replace_video_positions(build_position_grid(layout)[0], latent_t, lat_h, lat_w)
+    dense_positions = build_position_grid(layout)[0]
+    positions = lot.replace_video_positions(dense_positions, latent_t, lat_h, lat_w)
     rotation = dit._rotation_table(positions.unsqueeze(0).to(device), hidden.dtype)
+    patch = contextlib.nullcontext()
+    if dual is not None or (capture is not None and "kv" in capture):
+        from mixed_res import DualKVPlan, patched_attention
+
+        n_dense = latent_t * (lat_h // 2) * (lat_w // 2)
+        dense_rotation = dit._rotation_table(dense_positions[-n_dense:].unsqueeze(0).to(device), hidden.dtype)
+        plan = dual.plan(lot.layout, device) if dual is not None else DualKVPlan(lot.layout).to(device)
+        patch = patched_attention(dit.blocks, plan=plan, maps=None if dual is None else dual.maps,
+                                  video_start=video_segment.start, dense_rotation=dense_rotation,
+                                  capture=None if capture is None else capture.get("kv"))
     rows = build_timestep_rows(lot_layout, text_token_tags=tags, model_t_video=t_video, model_t_audio=t_audio)
     temb = dit._timestep_embeddings(rows.unique_timesteps, device)
 
-    for index, block in enumerate(dit.blocks):
-        if dit.blocks_to_swap:
-            dit.offloader.wait_for_block(index)
-        if dit.gradient_checkpointing and dit.training:
-            forward = block
-            if dit.activation_cpu_offloading:
-                forward = create_cpu_offloading_wrapper(forward, device)
-            hidden = torch.utils.checkpoint.checkpoint(forward, hidden, temb, rows.block_segments, rotation,
-                                                       use_reentrant=False)
-        else:
-            hidden = block(hidden, temb, rows.block_segments, rotation)
-        if dit.blocks_to_swap:
-            dit.offloader.submit_move_blocks_forward(dit.blocks, index)
+    with patch:
+        for index, block in enumerate(dit.blocks):
+            if dit.blocks_to_swap:
+                dit.offloader.wait_for_block(index)
+            if dit.gradient_checkpointing and dit.training:
+                forward = block
+                if dit.activation_cpu_offloading:
+                    forward = create_cpu_offloading_wrapper(forward, device)
+                hidden = torch.utils.checkpoint.checkpoint(forward, hidden, temb, rows.block_segments, rotation,
+                                                           use_reentrant=False)
+            else:
+                hidden = block(hidden, temb, rows.block_segments, rotation)
+            if dit.blocks_to_swap:
+                dit.offloader.submit_move_blocks_forward(dit.blocks, index)
+            if capture is not None and capture.get("block") == index:
+                capture["states"] = hidden[0, video_segment.start:].detach().float()
     hidden = hidden.to(device)
 
     # 3. Final layer: shared norm + AdaLN, then the extent heads in place of video_out.

@@ -30,7 +30,7 @@ Data: one or more H3 cache directories from ``build_cache_h3.py`` (``--cache``, 
 ``*_minimaxh3.safetensors`` latents with ``*_minimaxh3_te.safetensors`` text,
 so Qwen is never loaded here. Stills are ``(24, H, W)``; clips are
 ``(24, T, H, W)`` (cache 384×640, 22 frames for ``latent_t = 7``). Each latent
-is randomly cropped to a token grid divisible by 4. ``--init DIR`` warm-starts
+is randomly cropped to whole 2×2 patches (any token grid: layouts clip at the edges). ``--init DIR`` warm-starts
 the adapter and LoRA from an earlier run's ``adapter.pt`` / ``lora.safetensors``
 with a fresh optimizer.
 
@@ -122,7 +122,7 @@ def load_item(item, rng: random.Random, device) -> tuple[torch.Tensor, torch.Ten
         mask = handle.get_tensor("attention_mask")
     if latent.ndim == 3:
         latent = latent.unsqueeze(1)                      # (24, 1, H, W)
-    step = 2 * SUPER                                       # latent pixels per super-cell
+    step = 2                                               # one 2×2 patch; layouts tile any token grid
     height, width = latent.shape[-2] // step * step, latent.shape[-1] // step * step
     if MAX_LATENT_HW is not None:
         height = min(height, MAX_LATENT_HW[0] // step * step)
@@ -146,12 +146,20 @@ def load_adapter_state(run_dir: Path) -> dict:
 # -------------------------------------------------------------------------------- layout
 
 def token_detail(latent: torch.Tensor) -> torch.Tensor:
-    """``(T, H, W)`` detail per token: distance from its 4×4-cell mean, on the clean latent."""
+    """``(T, H, W)`` detail per token: distance from its 4×4-cell mean, on the clean latent.
+
+    Cells cut by the far edge average only the tokens inside the grid."""
     tokens = patchify(latent.float())[0]                   # (T, H, W, 96)
     grid = tokens.permute(0, 3, 1, 2)                       # (T, 96, H, W)
-    coarse = F.avg_pool2d(grid, SUPER)
-    coarse = F.interpolate(coarse, scale_factor=SUPER, mode="nearest")
+    height, width = grid.shape[-2:]
+    coarse = cell_mean(grid)
+    coarse = coarse.repeat_interleave(SUPER, -2).repeat_interleave(SUPER, -1)[..., :height, :width]
     return (grid - coarse).norm(dim=1)
+
+
+def cell_mean(grid: torch.Tensor) -> torch.Tensor:
+    """Mean over 4×4 super-cells of ``(..., H, W)``; edge cells average only their in-grid part."""
+    return F.avg_pool2d(grid, SUPER, ceil_mode=True)
 
 
 DEFAULT_MIX = {"uniform": 0.10, "mosaic": 0.15, "box": 0.20, "focus": 0.20, "texture": 0.15}
@@ -195,7 +203,10 @@ def _box_desired(time: int, height: int, width: int, rng: random.Random) -> torc
 
 
 def _focus_desired(time: int, height: int, width: int, rng: random.Random) -> torch.Tensor:
-    """An in-focus ellipse (1×1), a 2×2 ring, coarse outside; the depth-of-field family."""
+    """An in-focus ellipse (1×1), a 2×2 ring, coarse outside. Training stand-in for depth_layout.
+
+    A measured depth map derives its layout through layout_sources.depth_layout (circle of confusion).
+    """
     from layout_sources import desired_from_levels
 
     cy, cx = rng.uniform(0.25, 0.75), rng.uniform(0.25, 0.75)
@@ -269,7 +280,7 @@ def _legacy_mosaic(latent: torch.Tensor, rng: random.Random, dense_p: float,
         extent = rng.choice(MID + COARSE)
         return _tile(time, height, width, lambda _t, _u, _v: extent), "uniform"
     detail = token_detail(latent).cpu()
-    cells = F.avg_pool2d(detail.unsqueeze(1), SUPER).squeeze(1)    # (T, H/4, W/4)
+    cells = cell_mean(detail.unsqueeze(1)).squeeze(1)              # (T, ceil(H/4), ceil(W/4))
     flat = cells.flatten()
     low_q, high_q = sorted((rng.uniform(0.2, 0.6), rng.uniform(0.5, 0.9)))
     low, high = float(flat.quantile(low_q)), float(flat.quantile(high_q))
@@ -285,15 +296,31 @@ def _legacy_mosaic(latent: torch.Tensor, rng: random.Random, dense_p: float,
     return _tile(time, height, width, pick), "mosaic"
 
 
+def _spans(start: int, length: int, step: int) -> list[tuple[int, int]]:
+    """``(offset, size)`` pieces covering ``[start, start + length)``: ``step`` while it fits,
+    then the remainder in descending powers of two (3 -> 2 + 1)."""
+    pieces, pos, end = [], start, start + length
+    while pos < end:
+        size = step
+        while size > end - pos:
+            size //= 2
+        pieces.append((pos, size))
+        pos += size
+    return pieces
+
+
 def _tile(time: int, height: int, width: int, choose) -> LotLayout:
+    """One extent per 4×4 super-cell. Cells cut by the far edge tile their remainder with the
+    largest power-of-two pieces that fit (a 4×4 choice is 4×2 on a 2-token strip), so any
+    grid works, e.g. H3's 1344×768 (24×42 tokens). Every piece is in H3's bank."""
     rects = []
     for t in range(time):
         for u0 in range(0, height, SUPER):
             for v0 in range(0, width, SUPER):
                 _et, eh, ew = choose(t, u0, v0)
-                for u in range(u0, u0 + SUPER, eh):
-                    for v in range(v0, v0 + SUPER, ew):
-                        rects.append(TokenRect(t, u, v, 1, eh, ew))
+                for u, ph in _spans(u0, min(SUPER, height - u0), eh):
+                    for v, pw in _spans(v0, min(SUPER, width - v0), ew):
+                        rects.append(TokenRect(t, u, v, 1, ph, pw))
     return layout_from_rects(time, height, width, rects)
 
 
@@ -372,6 +399,10 @@ def main() -> None:
                         help="random spatial crop cap in latent pixels (multiples of 8), e.g. 40 32")
     parser.add_argument("--init", type=Path, default=None,
                         help="warm-start adapter.pt + lora.safetensors from an earlier run dir")
+    parser.add_argument("--dual", type=Path, default=None,
+                        help="up_maps.pt from mixed_res_h3.py fit-kv: 1x1 queries attend to a dense K/V view "
+                             "(MPEG-Diffusion's dual-resolution attention); the maps train with --dual-lr")
+    parser.add_argument("--dual-lr", type=float, default=1e-4)
     parser.add_argument("--steps", type=int, default=2000)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--adapter-lr", type=float, default=1e-4)
@@ -432,6 +463,14 @@ def main() -> None:
     lora_groups, _ = network.prepare_optimizer_params(args.lr)
     adapter_params = [p for name, p in adapter.named_parameters() if not name.startswith("bank.")]
     groups = lora_groups + [{"params": adapter_params, "lr": args.adapter_lr}]
+    dual = None
+    if args.dual is not None:
+        from mixed_res import DualKV
+        from mixed_res_h3 import load_maps
+
+        dual = DualKV(load_maps(args.dual, device).train().requires_grad_(True))
+        groups.append({"params": list(dual.maps.parameters()), "lr": args.dual_lr})
+        print(f"LOT_H3 kind=train_dual from={args.dual} rank={dual.maps.rank}", flush=True)
     try:
         import bitsandbytes as bnb
         optimizer = bnb.optim.AdamW8bit(groups, weight_decay=0.0)
@@ -482,7 +521,7 @@ def main() -> None:
         gen = None if noise_seed is None else torch.Generator(device=device).manual_seed(noise_seed)
         noise = torch.randn(y0.shape, device=device, generator=gen)
         y_t, _ = sample_noisy(y0, sigma, noise)
-        out = predict(dit, y_t, 1.0 - sigma, text, lot=splice)
+        out = predict(dit, y_t, 1.0 - sigma, text, lot=splice, dual=dual)
         data = lot_h3_clean_loss(out, y_t, y0, sigma)
         gap = None
         # Training draws its own layout (kind != "fixed"); evals pass one and opt in explicitly.
@@ -533,6 +572,9 @@ def main() -> None:
         torch.save({k: v for k, v in adapter.state_dict().items()}, args.out / f"adapter{tag}.pt")
         network.save_weights(str(args.out / f"lora{tag}.safetensors"), torch.bfloat16,
                              {"lot_h3": "phase5", "rank": str(args.rank)})
+        if dual is not None:
+            torch.save({"state": dual.maps.state_dict(), "rank": dual.maps.rank, "layers": len(dit.blocks),
+                        "run": str(args.out)}, args.out / f"up_maps{tag}.pt")
         print(f"LOT_H3 kind=train_saved tag={tag or 'final'} out={args.out}", flush=True)
 
     network.train()

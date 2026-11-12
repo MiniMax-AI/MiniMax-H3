@@ -19,6 +19,15 @@ The core modules (`layout`, `flow`, `adapter`, `h3`, `h3_positions`, `h3_splice`
 - Extent input and output heads, initialized as `W_in A^T` and `A W_out`.
 - Velocity recovery through `AsymFlowMixin.asymflow_velocity` with `s = 1`, `k = 1`, which is eq. 9. The module is loaded from `../LakonLab/lakonlab/models/architectures/asymflow/common.py` so the package import (and its `mmcv` dependency) is skipped.
 - Clean-data loss (eq. 17).
+- Layouts on any token grid, including H3's default 1344×768 (24×42 tokens): a 4×4 cell cut by the edge keeps the largest power-of-two pieces that fit (4×2 on the 2-token strip). Layouts are per latent frame; every token has a temporal extent of 1.
+
+### Mixed-resolution additions (MPEG-Diffusion)
+
+`mixed_res.py` adapts three ideas from [MPEG-Diffusion: Mixed-Resolution Video Generation](https://arxiv.org/abs/2611.12069) (Menn, Gu, He, V S, Song, Liu, Xie, Huang (Roblox), Xu and Marculescu (UT Austin), 2026) to LoT's single mixed-extent sequence; `mixed_res_h3.py` fits, trains and renders them on H3. All are optional and off by default.
+
+- **Dense K/V view** (their dual-resolution attention; Prop. 1: a shared K/V stands in for `n` tokens exactly only when they are identical). 1×1 queries attend to every coarse token's key/value expanded to its cells by `k + U Vᵀ k` (copy plus a rank-r delta, ridge-initialised from paired dense/coarse K/V), before RoPE, at dense positions. Other queries keep LoT attention. `h3_musubi.predict(..., dual=)`, `train_h3.py --dual`.
+- **Region head** (their self-selected HR region). `s = wᵀ LN(h)` on block 25's video tokens, smoothed in space and time, thresholded at `m + α(p − m)`. The sampler runs a coarse layout, then switches to the per-latent-frame layout the head picks. Labels are self-supervised: tokens where the coarse clean estimate is furthest from the dense model's.
+- **Seam mixer** (their decoder mixer `G`). A zero-initialised 3D-conv residual on the final latent outside the 1×1 region, trained against the dense model's clean estimate.
 
 Bases start as a semi-orthonormal mean lift (`A^T A = I`, identity when the extent is 1). Call `bank.fit_` on aligned `(dense patch, multi-scale VAE token)` pairs before training. Those buffers stay frozen.
 

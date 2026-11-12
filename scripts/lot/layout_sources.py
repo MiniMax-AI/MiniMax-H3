@@ -19,7 +19,7 @@ import torch
 import torch.nn.functional as F
 
 from h3_positions import FRAME_PER_TOKEN
-from layout import LotLayout, TokenRect, area_average, layout_from_desired
+from layout import LotLayout, TokenRect, area_average, blur_radius, layout_from_desired
 
 EXTENTS = (1, 2, 4)
 
@@ -55,14 +55,14 @@ def to_latent_frames(field: torch.Tensor, latent_t: int, reduce: str = "max") ->
 
 
 def layout_from_desired_any(desired: torch.Tensor) -> LotLayout:
-    """Quadtree (4 → 2 → 1) for any ``(T, H, W)`` grid; edges that do not fill a 4×4 cell stay 1×1."""
-    desired = desired.long().clamp(1, 4)
-    time, height, width = desired.shape
-    pad_h, pad_w = (-height) % 4, (-width) % 4
-    padded = F.pad(desired, (0, pad_w, 0, pad_h), value=1)
-    full = layout_from_desired(padded, root=4)
-    rects = [r for r in full.rects if r.u + r.eh <= height and r.v + r.ew <= width]
-    return LotLayout(time, height, width, tuple(rects))
+    """Quadtree (4 → 2 → 1) for any ``(T, H, W)`` grid.
+
+    A 4×4 cell cut by the far edge keeps the clipped rectangle when its cells
+    allow it (4×2 on the 2-token strip of H3's 24×42, 2×4 on a 2-row strip), so
+    edges coarsen like the interior instead of falling back to 1×1. Every
+    clipped extent is in H3's bank (FINE + MID + COARSE).
+    """
+    return layout_from_desired(desired.long().clamp(1, 4), root=4, edge_rects=True)
 
 
 def desired_from_levels(fine: torch.Tensor, mid: torch.Tensor | None, background: int) -> torch.Tensor:
@@ -117,15 +117,47 @@ def boxes_to_mask(boxes: list[tuple[float, float, float, float]], height: int, w
     return mask
 
 
-def depth_layout(depth: torch.Tensor, latent_t: int, token_h: int, token_w: int, *,
-                 focus: float = 0.75, band: float = 0.15, background: int = 4) -> LotLayout:
-    """Depth of field: 1×1 within ``band`` of the focus depth, 2×2 within ``2*band``, coarse beyond.
+# lot/layout.py layout_from_blur. A cell may join extent b only when its circle of
+# confusion is at least this radius. Coarser extents need a larger defocus.
+_BLUR_SUPPORT = ((8, 3.0), (4, 1.0), (2, 0.2))
 
-    ``depth`` in [0, 1] with any convention (Depth Anything: brighter = nearer);
-    ``focus`` is on the same scale.
+
+def _desired_from_radius(radius: torch.Tensor, background: int) -> torch.Tensor:
+    """Blur radius -> coarsest extent each cell may join. In-focus cells stay at 1.
+
+    ``background`` is the coarsest square this caller can emit. H3's video heads stop at 4,
+    so a radius that would be an 8×8 square stays at 4.
     """
-    off = (_tokens(depth, latent_t, token_h, token_w, reduce="mean") - float(focus)).abs()
-    return layout_from_desired_any(desired_from_levels(off <= band, off <= 2 * band, background))
+    desired = torch.ones(radius.shape, dtype=torch.long)
+    for extent, support in reversed(_BLUR_SUPPORT):
+        if extent > background:
+            continue
+        desired = torch.where(radius >= support, torch.full_like(desired, extent), desired)
+    return desired
+
+
+def depth_layout(depth: torch.Tensor, latent_t: int, token_h: int, token_w: int, *,
+                 focus: float = 0.75, band: float = 0.15, background: int = 4,
+                 r_target: float = 4.0) -> LotLayout:
+    """Derived depth-of-field layout. Fine tokens on the focal plane, coarse squares on the defocus.
+
+    The radius is the circle of confusion (eqs. 21–22): ``|1/z - 1/z_focus|``, scaled so the
+    95th percentile of each latent frame equals ``r_target``. A square is kept only when every
+    cell inside it is blurred enough for that extent. ``depth`` is non-negative and on the same
+    scale as ``focus``. A Depth Anything map (brighter = nearer, typically in [0, 1]) is legal
+    when ``focus`` is read from that same map. ``band`` stays in the signature for existing
+    callers; the radius replaces that fixed band.
+    """
+    if background not in EXTENTS:
+        raise ValueError(f"background extent must be one of {EXTENTS}")
+    if focus <= 0 or r_target < 0 or band <= 0:
+        raise ValueError("focus must be positive, on the depth map's scale; r_target and band must be positive")
+    tokens = _tokens(depth, latent_t, token_h, token_w, reduce="mean")
+    if not torch.isfinite(tokens).all() or float(tokens.min()) < 0:
+        raise ValueError("depth must be finite and non-negative")
+    desired = torch.stack([_desired_from_radius(blur_radius(frame, float(focus), r_target), background)
+                           for frame in tokens])
+    return layout_from_desired_any(desired)
 
 
 def texture_scores(image: torch.Tensor, token_h: int, token_w: int) -> torch.Tensor:
