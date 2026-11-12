@@ -5,7 +5,7 @@
     LOT_H3_TRAIN=1 python3 lot/train_tt.py region  --pairs P --out R [--train R]   # region head on face/subject masks
     LOT_H3_TRAIN=1 python3 lot/train_tt.py decoder --pairs P --out R               # upscaler U + mixer G
 
-Paper: Menn et al., MPEG-Diffusion: Mixed-Resolution Video Generation, arXiv:2611.12069.
+Paper: Dennis Menn, Tianpei Gu, Guande He, Aryan V S, Yanke Song, Nan Liu, Desai Xie, Xun Huang, Chenfeng Xu and Diana Marculescu, MPEG-Diffusion: Mixed-Resolution Video Generation, arXiv:2611.12069.
 
 ``lora`` (their Sec. 4 "Training", eq. 2): a rank-``--rank`` LoRA on every block's qkv/out/fc1/fc2,
 the ``f_up`` maps (start from ``two_track_h3.py fit-kv``) and the resolution embedding (one vector

@@ -6,7 +6,7 @@
     python3 lot/two_track_h3.py fit-kv --out DIR [--items 24]     # ridge fit of f_up, base model at LR and HR
     python3 lot/two_track_h3.py region --out DIR [--items 200]    # linear region head on the LR track's states
 
-Paper: Menn et al., MPEG-Diffusion: Mixed-Resolution Video Generation, arXiv:2611.12069.
+Paper: Dennis Menn, Tianpei Gu, Guande He, Aryan V S, Yanke Song, Nan Liu, Desai Xie, Xun Huang, Chenfeng Xu and Diana Marculescu, MPEG-Diffusion: Mixed-Resolution Video Generation, arXiv:2611.12069.
 
 ``mixed_res_h3.py`` puts the paper's pieces on LoT's merged tokens, so its coarse region is only as
 good as the LoT adapter. Here the LR track is what the paper uses: the unmodified base model at

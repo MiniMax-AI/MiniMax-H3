@@ -69,7 +69,7 @@ def main() -> None:
             continue
         url = f"{row['src']}?auto=compress&cs=tinysrgb&w={args.width}"
         try:
-            request = urllib.request.Request(url, headers={"User-Agent": "lot-diffusion-fetch/1.0"})
+            request = urllib.request.Request(url, headers={"User-Agent": "mpeg-diffusion-fetch/1.0"})
             with urllib.request.urlopen(request, timeout=30) as response:
                 data = response.read()
         except Exception as error:  # noqa: BLE001 - one bad URL should not stop the run

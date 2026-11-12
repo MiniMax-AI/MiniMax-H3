@@ -1,10 +1,10 @@
 # Level-of-Token on H3: cheatsheet
 
-> **Maintained at [scrya-com/lot-diffusion](https://github.com/scrya-com/lot-diffusion)** (same code, with the musubi-tuner H3 runtime bundled in `third_party/`).
+> **Maintained at [scrya-com/mpeg-diffusion](https://github.com/scrya-com/mpeg-diffusion)** (same code, with the musubi-tuner H3 runtime bundled in `third_party/`).
 
-> **⚠️ Research checkpoints: LoT output is still worse than dense H3, and it needs more training. Help wanted: [help-wanted discussion](https://github.com/scrya-com/lot-diffusion/discussions/1).** Weights: [HF johndpope/MiniMax-H3-LoT](https://huggingface.co/johndpope/MiniMax-H3-LoT) (MiniMax H3 Community License; not for use in the EU, UK, South Korea or USA).
+> **⚠️ Research checkpoints: LoT output is still worse than dense H3, and it needs more training. Help wanted: [help-wanted discussion](https://github.com/scrya-com/mpeg-diffusion/discussions/1).** Weights: [HF johndpope/MiniMax-H3-LoT](https://huggingface.co/johndpope/MiniMax-H3-LoT) (MiniMax H3 Community License; not for use in the EU, UK, South Korea or USA).
 
-LoT gives the H3 DiT fewer, larger tokens where detail is low, then recovers the full-resolution velocity (Nakayama et al., [arXiv 2610.05816](https://arxiv.org/abs/2610.05816)). The VAE latent stays full size; only the transformer sequence shrinks. Full walkthrough: [README → Training H3 for LoT from your own mp4s](README.md#training-h3-for-lot-from-your-own-mp4s). Results and history: [issue 1](https://github.com/johndpope/MiniMax-H3/issues/1).
+LoT gives the H3 DiT fewer, larger tokens where detail is low, then recovers the full-resolution velocity (Kiyohiro Nakayama, Brian Chao, Jan Ackermann, Hansheng Chen, Federico Tombari, Leonidas Guibas, Lior Yariv and Gordon Wetzstein, [arXiv 2610.05816](https://arxiv.org/abs/2610.05816)). The VAE latent stays full size; only the transformer sequence shrinks. Full walkthrough: [README → Training H3 for LoT from your own mp4s](README.md#training-h3-for-lot-from-your-own-mp4s). Results and history: [issue 1](https://github.com/johndpope/MiniMax-H3/issues/1).
 
 Run everything from the repo root. One GPU job at a time; the scripts refuse to start beside another one and never kill it.
 
@@ -130,7 +130,7 @@ python3 scripts/lot/time_decode_h3.py    # VAE decode (LoT does not speed this u
 
 ## 6. Mixed-resolution additions (MPEG-Diffusion, arXiv 2611.12069)
 
-Optional and off by default. Code: `scripts/lot/mixed_res.py` (model-agnostic) and `scripts/lot/mixed_res_h3.py` (H3), adapted from [Menn et al., MPEG-Diffusion: Mixed-Resolution Video Generation](https://arxiv.org/abs/2611.12069).
+Optional and off by default. Code: `scripts/lot/mixed_res.py` (model-agnostic) and `scripts/lot/mixed_res_h3.py` (H3), adapted from [Dennis Menn, Tianpei Gu, Guande He, Aryan V S, Yanke Song, Nan Liu, Desai Xie, Xun Huang, Chenfeng Xu and Diana Marculescu, MPEG-Diffusion: Mixed-Resolution Video Generation](https://arxiv.org/abs/2611.12069).
 
 ```bash
 R=scripts/lot/runs/my_run; O=scripts/lot/runs/my_mixed; C=/path/to/cache_1344x768
@@ -152,7 +152,7 @@ Layouts also tile any token grid now, including H3's default 1344x768 (24x42 tok
 
 ## 7. Two-track mixed resolution (the paper's own arrangement): train it
 
-`scripts/lot/two_track_h3.py` runs the unmodified H3 at half resolution (LR track) and adds full-resolution (HR) tokens only on a region, with dual-resolution attention. Untrained, it renders clean images, but faces are only as good as the LR track draws them: the HR track joins at step 18 of 20 and can only add texture. Training lets it join earlier and redraw the face. The background and the paper's recipe are in the [README](https://github.com/scrya-com/lot-diffusion#mixed-resolution-following-mpeg-diffusion).
+`scripts/lot/two_track_h3.py` runs the unmodified H3 at half resolution (LR track) and adds full-resolution (HR) tokens only on a region, with dual-resolution attention. Untrained, it renders clean images, but faces are only as good as the LR track draws them: the HR track joins at step 18 of 20 and can only add texture. Training lets it join earlier and redraw the face. The background and the paper's recipe are in the [README](https://github.com/scrya-com/mpeg-diffusion#mixed-resolution-following-mpeg-diffusion).
 
 ### One command
 
@@ -164,11 +164,11 @@ pip install opencv-python ultralytics lpips    # face detector, person masks, de
 WORK=/data/tt bash scripts/lot/train_tt_all.sh
 ```
 
-From a fresh machine, the code home [scrya-com/lot-diffusion](https://github.com/scrya-com/lot-diffusion) bundles the runtime:
+From a fresh machine, the code home [scrya-com/mpeg-diffusion](https://github.com/scrya-com/mpeg-diffusion) bundles the runtime:
 
 ```bash
 # 1. Code and Python deps (install torch for your CUDA first)
-git clone https://github.com/scrya-com/lot-diffusion && cd lot-diffusion
+git clone https://github.com/scrya-com/mpeg-diffusion && cd mpeg-diffusion
 pip install -r requirements.txt
 
 # 2. Weights: int8 DiT (21 GB), video VAE, Qwen3-VL text encoder (NVFP4 needs a Blackwell card;
@@ -278,7 +278,7 @@ cp /tmp/lot/run4_nikki_distill/adapter.safetensors ComfyUI/models/lot/run4_nikki
 cp /tmp/lot/run4_nikki_distill/lora.safetensors    ComfyUI/models/loras/minimax_h3_lot_run4_nikki_lora.safetensors
 ```
 
-Inside ComfyUI, a 1×1 `dense` layout reproduces the stock forward exactly (relative error 0 with ComfyUI's bf16 head weights). `center` ran at 5.6 vs 4.1 it/s on a 768×1152 still (1.35×) and **3.45 vs 1.33 it/s on a 22-frame 512×768 clip (2.6×)**. The output is visibly softer than dense: **research weights, more training wanted** ([help-wanted discussion](https://github.com/scrya-com/lot-diffusion/discussions/1)).
+Inside ComfyUI, a 1×1 `dense` layout reproduces the stock forward exactly (relative error 0 with ComfyUI's bf16 head weights). `center` ran at 5.6 vs 4.1 it/s on a 768×1152 still (1.35×) and **3.45 vs 1.33 it/s on a 22-frame 512×768 clip (2.6×)**. The output is visibly softer than dense: **research weights, more training wanted** ([help-wanted discussion](https://github.com/scrya-com/mpeg-diffusion/discussions/1)).
 
 ## Flags that matter
 
@@ -321,7 +321,7 @@ Inside ComfyUI, a 1×1 `dense` layout reproduces the stock forward exactly (rela
 | 3 | same | `--distill 1` from run 2 | **First visible gain**: teacher gap −16–18%, the prompt's subject comes back |
 | 4 | + 516 Nikki talk/pose clips | `--distill 1` from run 3, swap 8 | Gap −27%, data −19–21%. Poses clearly better; talking-head mouths still distort in coarse bands. On HF. |
 
-Next ideas: more steps and mixed-style data, a higher `--dense-p` (the LoRA can bend bodies even with LoT off), a larger rank or nonlinear extent heads. Discussion: [help-wanted discussion](https://github.com/scrya-com/lot-diffusion/discussions/1).
+Next ideas: more steps and mixed-style data, a higher `--dense-p` (the LoRA can bend bodies even with LoT off), a larger rank or nonlinear extent heads. Discussion: [help-wanted discussion](https://github.com/scrya-com/mpeg-diffusion/discussions/1).
 
 ## Gotchas
 

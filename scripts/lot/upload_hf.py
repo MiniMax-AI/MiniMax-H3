@@ -23,7 +23,7 @@ import torch
 LICENSE_LINK = "https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE"
 CODE = "https://github.com/johndpope/MiniMax-H3/tree/main/scripts/lot"
 ISSUE = "https://github.com/johndpope/MiniMax-H3/issues/1"
-HELP = "https://github.com/scrya-com/lot-diffusion/discussions/1"
+HELP = "https://github.com/scrya-com/mpeg-diffusion/discussions/1"
 # Section III.4 of the H3 Community License: every distribution carries this NOTICE text.
 NOTICE = ("MiniMax H3 is licensed under the MiniMax H3 Community License Agreement, "
           "Copyright © 2026 MiniMax. All Rights Reserved.\n\n"
@@ -79,7 +79,7 @@ tags:
 
 {warnings(repo)}
 
-Research weights for running **MiniMax-H3**'s DiT on a **Level-of-Token (LoT)** layout: fewer, larger tokens where detail is low, with the full-resolution velocity recovered afterwards ([Nakayama et al., arXiv 2610.05816](https://arxiv.org/abs/2610.05816)). The VAE latent stays full size; only the transformer sequence shrinks. On one 24 GB card a 124-frame 768×1344 DiT forward (37 latent frames) measured 52.3 s dense vs 18.3 s LoT (2.85×, `center` layout). The VAE decode is unchanged.
+Research weights for running **MiniMax-H3**'s DiT on a **Level-of-Token (LoT)** layout: fewer, larger tokens where detail is low, with the full-resolution velocity recovered afterwards ([Kiyohiro Nakayama, Brian Chao, Jan Ackermann, Hansheng Chen, Federico Tombari, Leonidas Guibas, Lior Yariv and Gordon Wetzstein, arXiv 2610.05816](https://arxiv.org/abs/2610.05816)). The VAE latent stays full size; only the transformer sequence shrinks. On one 24 GB card a 124-frame 768×1344 DiT forward (37 latent frames) measured 52.3 s dense vs 18.3 s LoT (2.85×, `center` layout). The VAE decode is unchanged.
 
 **Status: research.** Coarse regions are still softer than dense H3. Progress, renders and caveats are tracked in [the issue]({ISSUE}).
 

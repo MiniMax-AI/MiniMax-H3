@@ -1,7 +1,7 @@
 """Level-of-Token layouts.
 
 A layout is a partition of the uniform token lattice into axis-aligned
-rectangles. Extents are measured in uniform tokens, matching Nakayama et al.
+rectangles. Extents are measured in uniform tokens, matching Kiyohiro Nakayama, Brian Chao, Jan Ackermann, Hansheng Chen, Federico Tombari, Leonidas Guibas, Lior Yariv and Gordon Wetzstein.
 2026, Sec. 3.1. Video layouts in the paper keep a temporal extent of 1 and
 vary only the spatial rectangle (Appendix A.10).
 """

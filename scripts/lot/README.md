@@ -1,10 +1,10 @@
 # Level-of-Token Diffusion, drop-in for MiniMax-H3
 
-> **Maintained at [scrya-com/lot-diffusion](https://github.com/scrya-com/lot-diffusion)** (same code, with the musubi-tuner H3 runtime bundled in `third_party/`).
+> **Maintained at [scrya-com/mpeg-diffusion](https://github.com/scrya-com/mpeg-diffusion)** (same code, with the musubi-tuner H3 runtime bundled in `third_party/`).
 
-> **⚠️ Research: the published LoT weights still need more training — help wanted: [help-wanted discussion](https://github.com/scrya-com/lot-diffusion/discussions/1).** Quick start and current numbers: [CHEATSHEET.md](CHEATSHEET.md). Weights: [HF johndpope/MiniMax-H3-LoT](https://huggingface.co/johndpope/MiniMax-H3-LoT) (MiniMax H3 Community License; not for use in the EU, UK, South Korea or USA). ComfyUI nodes: [ComfyUI-MiniMax-H3-Image-Lane](https://github.com/johndpope/ComfyUI-MiniMax-H3-Image-Lane).
+> **⚠️ Research: the published LoT weights still need more training — help wanted: [help-wanted discussion](https://github.com/scrya-com/mpeg-diffusion/discussions/1).** Quick start and current numbers: [CHEATSHEET.md](CHEATSHEET.md). Weights: [HF johndpope/MiniMax-H3-LoT](https://huggingface.co/johndpope/MiniMax-H3-LoT) (MiniMax H3 Community License; not for use in the EU, UK, South Korea or USA). ComfyUI nodes: [ComfyUI-MiniMax-H3-Image-Lane](https://github.com/johndpope/ComfyUI-MiniMax-H3-Image-Lane).
 
-Method code for [Level-of-Token Diffusion](https://arxiv.org/abs/2610.05816) (Nakayama et al., 2026). A LoT layout replaces the uniform visual token grid with rectangles of mixed size. The transformer sees the short sequence. A patch-wise asymmetric flow, taken from LakonLab, turns that sequence back into a dense velocity on the original lattice.
+Method code for [Level-of-Token Diffusion](https://arxiv.org/abs/2610.05816) (Kiyohiro Nakayama, Brian Chao, Jan Ackermann, Hansheng Chen, Federico Tombari, Leonidas Guibas, Lior Yariv and Gordon Wetzstein, 2026). A LoT layout replaces the uniform visual token grid with rectangles of mixed size. The transformer sees the short sequence. A patch-wise asymmetric flow, taken from LakonLab, turns that sequence back into a dense velocity on the original lattice.
 
 This track is separate from Separable Causal Diffusion. Nothing here imports `scripts/scd`.
 
@@ -23,7 +23,7 @@ The core modules (`layout`, `flow`, `adapter`, `h3`, `h3_positions`, `h3_splice`
 
 ### Mixed-resolution additions (MPEG-Diffusion)
 
-`mixed_res.py` adapts three ideas from [MPEG-Diffusion: Mixed-Resolution Video Generation](https://arxiv.org/abs/2611.12069) (Menn, Gu, He, V S, Song, Liu, Xie, Huang (Roblox), Xu and Marculescu (UT Austin), 2026) to LoT's single mixed-extent sequence; `mixed_res_h3.py` fits, trains and renders them on H3. All are optional and off by default.
+`mixed_res.py` adapts three ideas from [MPEG-Diffusion: Mixed-Resolution Video Generation](https://arxiv.org/abs/2611.12069) (Dennis Menn, Tianpei Gu, Guande He, Aryan V S, Yanke Song, Nan Liu, Desai Xie, Xun Huang, Chenfeng Xu and Diana Marculescu (UT Austin, Roblox), 2026) to LoT's single mixed-extent sequence; `mixed_res_h3.py` fits, trains and renders them on H3. All are optional and off by default.
 
 - **Dense K/V view** (their dual-resolution attention; Prop. 1: a shared K/V stands in for `n` tokens exactly only when they are identical). 1×1 queries attend to every coarse token's key/value expanded to its cells by `k + U Vᵀ k` (copy plus a rank-r delta, ridge-initialised from paired dense/coarse K/V), before RoPE, at dense positions. Other queries keep LoT attention. `h3_musubi.predict(..., dual=)`, `train_h3.py --dual`.
 - **Region head** (their self-selected HR region). `s = wᵀ LN(h)` on block 25's video tokens, smoothed in space and time, thresholded at `m + α(p − m)`. The sampler runs a coarse layout, then switches to the per-latent-frame layout the head picks. Labels are self-supervised: tokens where the coarse clean estimate is furthest from the dense model's.

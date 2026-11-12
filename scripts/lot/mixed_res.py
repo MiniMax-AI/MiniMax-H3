@@ -1,7 +1,7 @@
-"""Mixed-resolution additions to LoT, adapted from MPEG-Diffusion (Menn et al. 2026).
+"""Mixed-resolution additions to LoT, adapted from MPEG-Diffusion (Dennis Menn, Tianpei Gu, Guande He, Aryan V S, Yanke Song, Nan Liu, Desai Xie, Xun Huang, Chenfeng Xu and Diana Marculescu, 2026).
 
-MPEG-Diffusion: Mixed-Resolution Video Generation, Menn, Gu, He, V S, Song, Liu,
-Xie, Huang (Roblox), Xu and Marculescu (UT Austin), arXiv:2611.12069. That paper
+MPEG-Diffusion: Mixed-Resolution Video Generation, Dennis Menn, Tianpei Gu, Guande He, Aryan V S, Yanke Song, Nan Liu,
+Desai Xie, Xun Huang, Chenfeng Xu and Diana Marculescu (UT Austin, Roblox), arXiv:2611.12069. That paper
 keeps two token grids (HR inside a mask, LR elsewhere). LoT has one sequence of
 mixed extents. The three pieces here carry its ideas over to that sequence:
 

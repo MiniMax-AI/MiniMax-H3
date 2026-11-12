@@ -8,7 +8,7 @@
                                         [--dual DIR/up_maps.pt] [--mixer DIR/mixer.pt]
 
 ``RUN`` is a ``train_h3`` output dir (``adapter.pt`` or ``adapter.safetensors``, ``lora.safetensors``).
-Paper: Menn et al., MPEG-Diffusion: Mixed-Resolution Video Generation, arXiv:2611.12069.
+Paper: Dennis Menn, Tianpei Gu, Guande He, Aryan V S, Yanke Song, Nan Liu, Desai Xie, Xun Huang, Chenfeng Xu and Diana Marculescu, MPEG-Diffusion: Mixed-Resolution Video Generation, arXiv:2611.12069.
 
 fit-kv: for each item and sigma, one LoT forward on a coarse layout and one on the dense layout
 (same ``y_t``, LoRA on) capture every block's pre-RoPE video keys and values. Each coarse token

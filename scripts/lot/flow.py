@@ -2,7 +2,7 @@
 
 The velocity algebra is LakonLab's ``AsymFlowMixin.asymflow_velocity`` with
 scale ``s = 1`` and calibration ``k = 1``. That special case is equation 9 of
-Nakayama et al. 2026. LoT does not use AsymFlow's per-extent timestep
+Kiyohiro Nakayama, Brian Chao, Jan Ackermann, Hansheng Chen, Federico Tombari, Leonidas Guibas, Lior Yariv and Gordon Wetzstein, 2026. LoT does not use AsymFlow's per-extent timestep
 calibration (eq. 18). Extent scales are applied to the clean latent instead
 (eq. 16), which keeps a single timestep for every token.
 
