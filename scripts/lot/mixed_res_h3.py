@@ -238,7 +238,7 @@ def train_region(args) -> None:
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
-            total += float(loss)
+            total += float(loss.detach())
         with torch.no_grad():
             held_loss = sum(float(torch.nn.functional.binary_cross_entropy_with_logits(head(s.cuda()), t.cuda()))
                             for s, t in held) / len(held)
@@ -292,7 +292,7 @@ def train_mixer(args) -> None:
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
-            total += float(loss)
+            total += float(loss.detach())
         print(f"LOT_H3 kind=mixer_epoch epoch={epoch} train_l1={total / len(train):.5f} "
               f"held_l1={held_loss(False):.5f}", flush=True)
     args.out.mkdir(parents=True, exist_ok=True)
@@ -401,9 +401,12 @@ def decode(args) -> None:
     """VAE-decode ``latents.pt`` from ``render`` into PNGs and ``grid.png``."""
     from h3_musubi import load_vae
     from lot_paths import LOT_H3_VAE
+    import render_h3
     from render_h3 import grid, to_image
 
     meta = json.loads((args.out / "meta.json").read_text())
+    # ``grid`` sizes its cells from render_h3's canvas (768x1152); use this render's.
+    render_h3.WIDTH, render_h3.HEIGHT = (int(n) for n in meta["canvas"].split("x"))
     latents = torch.load(args.out / "latents.pt", map_location="cpu")
     decoder = load_vae(LOT_H3_VAE)
     rows = []

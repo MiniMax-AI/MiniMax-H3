@@ -150,6 +150,107 @@ LOT_H3_TRAIN=1 python3 scripts/lot/train_h3.py --pairs $P --init $R --dual $O/up
 
 Layouts also tile any token grid now, including H3's default 1344x768 (24x42 tokens): a 4x4 cell cut by the edge keeps the largest power-of-two pieces that fit.
 
+## 7. Two-track mixed resolution (the paper's own arrangement): train it
+
+`scripts/lot/two_track_h3.py` runs the unmodified H3 at half resolution (LR track) and adds full-resolution (HR) tokens only on a region, with dual-resolution attention. Untrained, it renders clean images, but faces are only as good as the LR track draws them: the HR track joins at step 18 of 20 and can only add texture. Training lets it join earlier and redraw the face. The background and the paper's recipe are in the [README](https://github.com/scrya-com/lot-diffusion#mixed-resolution-following-mpeg-diffusion).
+
+### One command
+
+In this repository (musubi-tuner is not bundled here, so point `MUSUBI_SRC` at a checkout's `src`):
+
+```bash
+export MUSUBI_SRC=/path/to/musubi-tuner/src LOT_H3_CHECKPOINT=... LOT_H3_VAE=... LOT_H3_TEXT_ENCODER=...
+pip install opencv-python ultralytics lpips    # face detector, person masks, decoder LPIPS
+WORK=/data/tt bash scripts/lot/train_tt_all.sh
+```
+
+From a fresh machine, the code home [scrya-com/lot-diffusion](https://github.com/scrya-com/lot-diffusion) bundles the runtime:
+
+```bash
+# 1. Code and Python deps (install torch for your CUDA first)
+git clone https://github.com/scrya-com/lot-diffusion && cd lot-diffusion
+pip install -r requirements.txt
+
+# 2. Weights: int8 DiT (21 GB), video VAE, Qwen3-VL text encoder (NVFP4 needs a Blackwell card;
+#    elsewhere use text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors)
+hf download Comfy-Org/MiniMax-H3 \
+  diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors \
+  vae/minimax_h3_video_vae_fp16.safetensors \
+  text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors \
+  --local-dir models
+export LOT_H3_CHECKPOINT=$PWD/models/diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors
+export LOT_H3_VAE=$PWD/models/vae/minimax_h3_video_vae_fp16.safetensors
+export LOT_H3_TEXT_ENCODER=$PWD/models/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors
+
+# 3. Pick the card (CUDA's default order is fastest-first, not nvidia-smi's) and check the install
+export CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=0
+python3 lot/test_lot.py                              # CPU, no weights -> ok 33
+
+# 4. Everything: 2,000 photos -> cache -> pairs -> maps -> LoRA -> region head -> decoder -> render
+WORK=/data/tt bash lot/train_tt_all.sh
+
+# Optional, before step 4: a 24-photo dry run and one training step, to see peak memory on this card
+WORK=/data/tt_check COUNT=24 STAGES="fetch cache pairs fitkv" bash lot/train_tt_all.sh
+LOT_H3_TRAIN=1 python3 lot/train_tt.py lora --pairs /data/tt_check/pairs --out /data/tt_check/lora \
+  --maps /data/tt_check/fit/up_maps_tt.pt --check
+```
+
+Knobs (environment variables of `train_tt_all.sh`): `COUNT` (photos, default 2000), `STEPS` (LoRA steps, 2000), `SWITCH` (sampler switch step of 20, 12), `SIZE` ("1344 768"), `STAGES` (subset, e.g. `"lora render"`), `PY` (Python with torch). Outputs land in `$WORK/{photos,cache,pairs,fit,lora,region,decoder,render}`; the result to post is `$WORK/render/grid.png` (columns: full res, half res, two-track) and `$WORK/lora/log.jsonl`.
+
+### The stages
+
+| Stage | Command (what `train_tt_all.sh` runs) | Writes | Paper |
+|---|---|---|---|
+| fetch | `fetch_pexels.py --out $W/photos --count 2000` | jpg + txt caption | data |
+| cache | `build_cache_h3.py media --src $W/photos --out $W/cache --size 1344 768`, then `text` | H3 latents, Qwen3-VL text | |
+| pairs | `build_pairs_tt.py --cache $W/cache --out $W/pairs --subject yolo` | HR + LR latents, face and person masks | Sec. H pairs |
+| fitkv | `two_track_h3.py fit-kv --pairs $W/pairs --out $W/fit --items 200` | `up_maps_tt.pt` | Sec. 3.1 / 4.1 init |
+| lora | `train_tt.py lora --pairs $W/pairs --out $W/lora --maps $W/fit/up_maps_tt.pt` | `lora.safetensors`, `tt_state.pt` | Sec. 4 eq. 2 |
+| region | `train_tt.py region --pairs $W/pairs --out $W/region --train $W/lora --switch 12` | `region_head_tt.pt` | Sec. 4.3 |
+| decoder | `train_tt.py decoder --pairs $W/pairs --out $W/decoder` | `decoder.pt` (U + G) | Sec. 4.2 / H |
+| render | `two_track_h3.py render --train $W/lora --region ... --decoder ... --switch 12 --hr-steps 0` | `grid.png`: hr / lr / two_track | |
+
+**Data.** `fetch_pexels.py` reads the CSV of the Hugging Face dataset [`gaunernst/pexels-portrait`](https://huggingface.co/datasets/gaunernst/pexels-portrait) (9,853 Pexels photos of people with one-sentence captions; it ships URLs, not images) and downloads landscape photos at 2048 px. The photos are under the Pexels license; keep them private. Most are portraits with large faces (a face covers 20-50% of the LR tokens), while the failing case is a small face in a scene. Mix in scene data: any still cache with people works (`--cache` and `--pairs` are repeatable), and other image folders go through `build_cache_h3.py media` the same way (one `.txt` caption per image). [`OpenFace-CQUPT/HumanCaption-HQ-311K`](https://huggingface.co/datasets/OpenFace-CQUPT/HumanCaption-HQ-311K) (CC-BY-4.0, URLs and long captions) is the other candidate found, not tried.
+
+**Pairs.** HR is the cached latent; LR is the same picture decoded, area-downsampled x0.5 and encoded. Faces come from OpenCV YuNet (a 230 KB model fetched once into `~/.cache/lot`; `--detector haar` needs no download), grown by one token (`--grow`). `--subject yolo` adds Ultralytics person masks (downloads `yolo11n-seg.pt` once). `index.json` lists face and subject token counts per pair; check that most pairs have a face.
+
+**LoRA.** Each step: one pair, one sigma (`--shift 3`), independent noise per resolution, HR region = the face mask (`--mask face`; falls back to the person mask, then to a random box; `--box-p 0.2` of steps use a box anyway). Loss: velocity MSE of the LR latent outside the region plus the HR latent inside, each averaged over its region (their eq. 2). Trains the LoRA (rank 16), the fitted maps (`--maps-lr`) and two resolution vectors (`--embed-lr`). `--check` runs one step and prints peak memory. Evals every 250 steps print `lr=` and `hr=` held-out losses; `hr` should fall faster than `lr`.
+
+**Region.** BCE on the LR track's block-25 states at the switch sigma, target the union of face and person masks (`--label`). Prints held-out mIoU of the thresholded mask (the paper: 0.59-0.67).
+
+**Decoder.** `U` (bicubic + learned residual) and `G` (3D-conv mixer), both identity-like at init, on real pairs: latent L1 outside the region (4x on a 2-pixel ring at the edge), `U`'s own L1, and pixel L1 + LPIPS on a decoded crop centred on the edge (VGG downloads once; `--lpips 0` turns it off). An undertrained `U` is bicubic, which is blurrier than the VAE upscale the sampler uses without `--decoder`: compare both before keeping it.
+
+**Render.** `--switch` is the step where the HR track starts (of `--steps 20`); after training try 10-14 (untrained: 18). `--hr-steps 0` keeps the model's own schedule after the switch; `--hr-steps 6` adds six steps linear in sigma. The `hr` and `lr` columns are the base model (LoRA off).
+
+### Hardware
+
+| Card | `--swap auto` picks | Measured |
+|---|---|---|
+| RTX PRO 6000 (96 GB) | 0 (all blocks resident), decoder `--crop 32` | not measured yet |
+| RTX 5090 (32 GB) | 8 | LoRA step 2.7 s, peak 19.6 GB; decoder (crop 16) 12 GB; crop 24 runs out |
+| RTX PRO 4000 (24 GB), 6 GB taken by other jobs | 24 | LoRA `--check` peak 13.3 GB, 24 s for the first step |
+
+`auto` reads free VRAM, so other processes on the card lower it. `gpu_guard` refuses a second LoT GPU job on the same machine, even on another card, so run the stages one after another. The 24 GB card can carry any stage alone (the decoder needs 12 GB), just slower.
+
+### Smoke test (about 15 minutes on a 5090)
+
+```bash
+WORK=/tmp/tt_smoke COUNT=24 STEPS=30 STAGES="fetch cache pairs" bash scripts/lot/train_tt_all.sh
+python3 scripts/lot/two_track_h3.py fit-kv --pairs /tmp/tt_smoke/pairs --out /tmp/tt_smoke/fit --items 4 --sigmas 0.3 0.7
+LOT_H3_TRAIN=1 python3 scripts/lot/train_tt.py lora --pairs /tmp/tt_smoke/pairs --out /tmp/tt_smoke/lora --maps /tmp/tt_smoke/fit/up_maps_tt.pt --check
+```
+
+Ran on 2026-11-13 with 24 photos (5090): every stage completes, faces found in 22 of 24 pairs, LoRA eval loss 0.367/0.416 (LR/HR) at step 0 and 0.275/0.314 at step 30, region head held mIoU 0.57. The 30-step render is not a result: it shows the plumbing works, and the images are broken at `--switch 12`, as expected before real training.
+
+### Without training
+
+```bash
+python3 scripts/lot/two_track_h3.py fit-kv --out $O --items 24     # base model at LR and HR -> up_maps_tt.pt
+python3 scripts/lot/two_track_h3.py render --out $O/render --maps $O/up_maps_tt.pt --box 0.3 0.15 0.7 0.9 --outline
+```
+
+Defaults: 18 of 20 steps at LR, then `--hr-steps 6`, `--feather 4`. The fitted maps are required: with copies (`--maps` omitted) the HR region is texture noise.
+
 ## ComfyUI (stills and video)
 
 The LoT nodes live in [ComfyUI-MiniMax-H3-Image-Lane](https://github.com/johndpope/ComfyUI-MiniMax-H3-Image-Lane): **MiniMax H3 LoT Apply** (layouts `center` / `bands` / `uniform2` / `uniform4` / `dense`) and **MiniMax H3 LoT Unscale Latent**, which is required before VAE Decode. Workflows (API format; they also ship in the pack's `workflows/`), each a LoT branch plus a dense A/B branch from one seed:
