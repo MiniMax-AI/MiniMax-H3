@@ -152,7 +152,7 @@ Layouts also tile any token grid now, including H3's default 1344x768 (24x42 tok
 
 ## 7. Two-track mixed resolution (the paper's own arrangement): train it
 
-`scripts/lot/two_track_h3.py` runs the unmodified H3 at half resolution (LR track) and adds full-resolution (HR) tokens only on a region, with dual-resolution attention. Untrained, it renders clean images, but faces are only as good as the LR track draws them: the HR track joins at step 18 of 20 and can only add texture. Training lets it join earlier and redraw the face. The background and the paper's recipe are in the [README](https://github.com/scrya-com/mpeg-diffusion#mixed-resolution-following-mpeg-diffusion).
+`scripts/lot/two_track_h3.py` runs the unmodified H3 at half resolution (LR track) and adds full-resolution (HR) tokens only on a region, with dual-resolution attention. Untrained, it renders clean images, but faces are only as good as the LR track draws them: the HR track joins at step 18 of 20 and can only add texture. Training lets it join earlier and redraw the face. The background and the paper's recipe are in the [README](https://github.com/scrya-com/mpeg-diffusion/blob/main/docs/MPEG_DIFFUSION.md).
 
 ### One command
 
@@ -195,7 +195,7 @@ LOT_H3_TRAIN=1 python3 lot/train_tt.py lora --pairs /data/tt_check/pairs --out /
   --maps /data/tt_check/fit/up_maps_tt.pt --check
 ```
 
-Knobs (environment variables of `train_tt_all.sh`): `COUNT` (photos, default 2000), `STEPS` (LoRA steps, 2000), `SWITCH` (sampler switch step of 20, 12), `SIZE` ("1344 768"), `STAGES` (subset, e.g. `"lora render"`), `PY` (Python with torch). Outputs land in `$WORK/{photos,cache,pairs,fit,lora,region,decoder,render}`; the result to post is `$WORK/render/grid.png` (columns: full res, half res, two-track) and `$WORK/lora/log.jsonl`.
+Knobs (environment variables of `train_tt_all.sh`): `TE_FROM=johndpope/MiniMax-H3-pexels-people-text` (precomputed caption embeddings for the 1,951 Pexels photos, so no 32B text encoder is needed for them), `COUNT` (photos, default 2000), `STEPS` (LoRA steps, 2000), `SWITCH` (sampler switch step of 20, 12), `SIZE` ("1344 768"), `STAGES` (subset, e.g. `"lora render"`), `PY` (Python with torch). Outputs land in `$WORK/{photos,cache,pairs,fit,lora,region,decoder,render}`; the result to post is `$WORK/render/grid.png` (columns: full res, half res, two-track) and `$WORK/lora/log.jsonl`.
 
 ### The stages
 

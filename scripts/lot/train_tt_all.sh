@@ -16,6 +16,7 @@ SIZE=${SIZE:-"1344 768"}             # training canvas (W H), multiples of 64
 STEPS=${STEPS:-2000}                 # LoRA steps
 SWITCH=${SWITCH:-12}                 # sampler switch the region head is trained for (of 20 steps)
 STAGES=${STAGES:-"fetch cache pairs fitkv lora region decoder render"}
+TE_FROM=${TE_FROM:-}                 # HF dataset with te/*_minimaxh3_te.safetensors (optional)
 export LOT_H3_TRAIN=1
 
 has() { [[ " $STAGES " == *" $1 "* ]]; }
@@ -23,6 +24,12 @@ mkdir -p "$WORK"
 
 has fetch   && $PY lot/fetch_pexels.py --out "$WORK/photos" --count "$COUNT"
 has cache   && $PY lot/build_cache_h3.py media --src "$WORK/photos" --out "$WORK/cache" --size $SIZE
+# Optional: precomputed caption embeddings (skips the 32B text encoder for captions it covers), e.g.
+# TE_FROM=johndpope/MiniMax-H3-pexels-people-text
+if has cache && [[ -n "${TE_FROM:-}" ]]; then
+  hf download "$TE_FROM" --repo-type dataset --include "te/*" --local-dir "$WORK/te_download"
+  cp -n "$WORK"/te_download/te/*_minimaxh3_te.safetensors "$WORK/cache/"
+fi
 has cache   && $PY lot/build_cache_h3.py text  --out "$WORK/cache"
 has pairs   && $PY lot/build_pairs_tt.py --cache "$WORK/cache" --out "$WORK/pairs" --subject yolo
 has fitkv   && $PY lot/two_track_h3.py fit-kv --pairs "$WORK/pairs" --out "$WORK/fit" --items 200

@@ -347,12 +347,36 @@ def load_trained(dit, train_dir: Path, tag: str = ""):
     if info.missing_keys:
         raise RuntimeError(f"LoRA load missed {len(info.missing_keys)} keys")
     network.to(device="cuda", dtype=torch.bfloat16).eval()
-    saved = torch.load(train_dir / f"tt_state{tag}.pt", map_location="cpu", weights_only=False)
+    published = train_dir / f"tt_state{tag}.safetensors"       # as upload_tt_hf.py publishes it
+    if published.is_file():
+        from safetensors.torch import load_file
+
+        with safe_open(str(published), "pt") as handle:
+            meta = handle.metadata() or {}
+        flat = load_file(str(published))
+        saved = {"layers": int(meta["layers"]), "rank": int(meta["rank"]), "hidden": int(meta["hidden"]),
+                 "maps": {k[5:]: v for k, v in flat.items() if k.startswith("maps.")},
+                 "res_embed": {k[10:]: v for k, v in flat.items() if k.startswith("res_embed.")}}
+    else:
+        saved = torch.load(train_dir / f"tt_state{tag}.pt", map_location="cpu", weights_only=False)
     maps = UpMaps(saved["layers"], HEAD_DIM, [EXTENT], rank=saved["rank"])
     maps.load_state_dict(saved["maps"])
     res_embed = ResolutionEmbedding(saved["hidden"])
     res_embed.load_state_dict(saved["res_embed"])
     return network, maps.to("cuda").eval(), res_embed.to("cuda").eval()
+
+
+def load_region(path: Path) -> dict:
+    """``region_head_tt.pt`` (as ``train_tt.py region`` saves it) or ``.safetensors`` (as published)."""
+    path = Path(path)
+    if path.suffix == ".safetensors":
+        from safetensors import safe_open
+        from safetensors.torch import load_file
+
+        with safe_open(str(path), "pt") as handle:
+            meta = handle.metadata() or {}
+        return {"state": load_file(str(path)), "hidden": int(meta["hidden"]), "block": int(meta["block"])}
+    return torch.load(path, map_location="cpu", weights_only=False)
 
 
 def load_decoder(path: Path):
@@ -397,7 +421,7 @@ def render(args) -> None:
     decoder = load_decoder(args.decoder) if args.decoder else None
     head = None
     if args.region:
-        saved = torch.load(args.region, map_location="cpu", weights_only=False)
+        saved = load_region(args.region)
         head = RegionHead(saved["hidden"]).cuda().eval()
         head.load_state_dict(saved["state"])
         args.block = saved["block"]
@@ -458,6 +482,95 @@ def render(args) -> None:
                  "maps": str(args.maps), "train": str(args.train), "decoder": str(args.decoder), "region": str(args.region), "box": args.box, "feather": args.feather})
     (args.out / "meta.json").write_text(json.dumps(meta, indent=1) + "\n")
     print(f"LOT_H3 kind=two_track_render_done out={args.out} ok=1", flush=True)
+
+
+@torch.no_grad()
+def draw_layout(args) -> None:
+    """What the region head picks, drawn: for held-out prompts from each ``--cache``, the base model samples
+    at half resolution; at ``--switch`` the head scores every token. Each row shows the final half-res
+    render (upscaled for display) with the score heatmap and the selected region, and the LoT layout that
+    region implies on the full-resolution token grid (1x1 inside, 2x2 on a one-token ring, 4x4 elsewhere)."""
+    import numpy as np
+    from PIL import Image, ImageDraw
+
+    from mixed_res import region_layout
+    from render_h3 import load_prompts
+    from train_h3 import list_items
+
+    dit = load_base(args.swap)
+    upscale = load_upscaler()
+    saved = load_region(args.region)
+    head = RegionHead(saved["hidden"]).cuda().eval()
+    head.load_state_dict(saved["state"])
+    block = saved["block"]
+    width, height = args.size
+    from safetensors import safe_open
+
+    from build_pairs_tt import caption_for
+
+    prompts = []
+    for cache in args.cache_list or [None]:
+        if cache is None:
+            prompts += load_prompts(args.prompts, None)
+            continue
+        for te in [te for _l, te in list_items(cache, args.holdout)[1]][:args.prompts]:
+            with safe_open(str(te), "pt") as handle:
+                hidden, keep = handle.get_tensor("hidden_states"), handle.get_tensor("attention_mask")
+            prompts.append((caption_for(str(te)) or te.name, hidden[keep].unsqueeze(0)))
+    colors = {1: (74, 222, 128), 4: (139, 180, 240), 16: (192, 132, 252)}
+    rows, meta = [], []
+    for index, (caption, embeds) in enumerate(prompts):
+        latent, _x0, states = native_sample(dit, embeds.to("cuda", torch.bfloat16), height=height // 2,
+                                            width=width // 2, steps=args.steps, seed=args.seed + index,
+                                            capture_at=args.switch - 1, block=block)
+        tok_h, tok_w = height // 64, width // 64
+        scores = head(states).float().cpu().reshape(1, tok_h, tok_w)
+        mask = region_mask(scores, alpha=args.alpha, floor=args.floor)
+        full = mask.repeat_interleave(2, 1).repeat_interleave(2, 2)
+        layout = region_layout(full, background=4, ring=1)
+        image = to_image_from(upscale.vae.decode(latent.to("cuda", upscale.dtype))).resize((width, height), Image.LANCZOS)
+        # Left: heatmap of the head's probability with the selected region outlined.
+        prob = torch.sigmoid(scores[0]).numpy()
+        heat = Image.fromarray((np.clip(prob, 0, 1) * 255).astype(np.uint8)).resize((width, height), Image.NEAREST)
+        red = Image.merge("RGB", (heat, Image.new("L", heat.size, 40), Image.new("L", heat.size, 40)))
+        left = outline(Image.blend(image, red, 0.45), mask)
+        # Right: the LoT layout, every token drawn at full-resolution token size (32 px).
+        right = image.copy()
+        draw = ImageDraw.Draw(right, "RGBA")
+        for rect in layout.rects:
+            x0, y0 = rect.v * 32, rect.u * 32
+            area = rect.eh * rect.ew
+            r, g, b = colors.get(area, (167, 139, 250))
+            draw.rectangle([x0, y0, x0 + rect.ew * 32 - 1, y0 + rect.eh * 32 - 1], outline=(r, g, b, 230),
+                           fill=(r, g, b, 40 if area > 1 else 70))
+        row = Image.new("RGB", (2 * width, height + 30), "white")
+        row.paste(left, (0, 30))
+        row.paste(right, (width, 30))
+        label = f"{caption[:110]}  |  region {float(mask.float().mean()):.0%} of frame, layout {layout.count} of {tok_h * tok_w * 4} tokens"
+        ImageDraw.Draw(row).text((8, 9), label, fill="black")
+        rows.append(row)
+        meta.append({"caption": caption, "region_share": round(float(mask.float().mean()), 4),
+                     "layout_tokens": layout.count, "full_tokens": tok_h * tok_w * 4})
+        print(f"LOT_H3 kind=layout prompt={index} region={float(mask.float().mean()):.2f} tokens={layout.count}",
+              flush=True)
+    args.out.mkdir(parents=True, exist_ok=True)
+    scale = args.sheet_scale
+    cell = (int(2 * width * scale), int((height + 30) * scale))
+    for start in range(0, len(rows), args.per_sheet):
+        chunk = rows[start:start + args.per_sheet]
+        sheet = Image.new("RGB", (cell[0], cell[1] * len(chunk)), "white")
+        for number, row in enumerate(chunk):
+            sheet.paste(row.resize(cell, Image.LANCZOS), (0, number * cell[1]))
+        sheet.save(args.out / f"layout_{start // args.per_sheet}.jpg", quality=90)
+    (args.out / "layout.json").write_text(json.dumps({"switch": args.switch, "alpha": args.alpha,
+                                                      "region": str(args.region), "items": meta}, indent=1) + "\n")
+    print(f"LOT_H3 kind=layout_done out={args.out} prompts={len(rows)} ok=1", flush=True)
+
+
+def to_image_from(pixels):
+    from render_h3 import to_image
+
+    return to_image(pixels)
 
 
 def outline(image, mask: torch.Tensor):
@@ -616,7 +729,11 @@ def train_region(args) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("phase", choices=("render", "fit-kv", "region"))
+    parser.add_argument("phase", choices=("render", "fit-kv", "region", "layout"))
+    parser.add_argument("--cache-list", type=Path, nargs="+", default=None,
+                        help="layout: caches whose held-out captions are the prompts (--prompts from each)")
+    parser.add_argument("--per-sheet", type=int, default=6, help="layout: rows per output sheet")
+    parser.add_argument("--sheet-scale", type=float, default=0.5, help="layout: sheet size relative to 2x canvas")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--cache", type=Path, default=None, help="still cache with text (prompts and fit data)")
     parser.add_argument("--holdout", type=int, default=24)
@@ -658,7 +775,7 @@ def main() -> None:
     if args.size[0] % 64 or args.size[1] % 64:
         raise SystemExit("--size sides must be multiples of 64 (the LR latent needs whole 2x2 patches)")
     refuse_if_busy("two_track_h3")
-    {"render": render, "fit-kv": fit_kv, "region": train_region}[args.phase](args)
+    {"render": render, "fit-kv": fit_kv, "region": train_region, "layout": draw_layout}[args.phase](args)
 
 
 if __name__ == "__main__":
